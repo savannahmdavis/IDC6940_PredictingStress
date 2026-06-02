@@ -1,7 +1,7 @@
 ---
 title: "Modeling Physiological and Behavioral Predictors of Stress Using a Linear Mixed Model on Wearable Health Data"
 subtitle: "Using Synthetic Longitudinal Wearable Device Data"
-author: "Savannah Davis (Advisor: Dr. Cohen)"
+author: "Savannah Davis<br>Bryce Mattos<br>Jessica Jones<br>Jordan Gainey<br>(Advisor: Dr. Cohen)"
 date: '`r Sys.Date()`'
 format:
   html:
