@@ -31,31 +31,12 @@ The introduction should:
 
 -   Clearly state the problem or question you're addressing.
 
-<!-- -->
-
 -   Introduce why it is relevant needs.
 
 -   Provide an overview of your approach.
 
-Example of writing including citing references:
+**Add intro here**
 
-*This is an introduction to ..... regression, which is a non-parametric
-estimator that estimates the conditional expectation of two variables
-which is random. The goal of a kernel regression is to discover the
-non-linear relationship between two random variables. To discover the
-non-linear relationship, kernel estimator or kernel smoothing is the
-main method to estimate the curve for non-parametric statistics. In
-kernel estimator, weight function is known as kernel function
-[@efr2008]. Cite this paper [@bro2014principal]. The GEE [@wang2014].
-The PCA [@daffertshofer2004pca]*. Topology can be used in machine
-learning [@adams2021topology]
-
-For Symbolic Regression [@wang2019symbolic] *This is my work and I want
-to add more work...*
-
-Cite new paper [@su2012linear]
-
-Classification of Knee OA was studied here [@guida2021knee]
 
 ## Methods
 
@@ -71,7 +52,7 @@ definition, we can create the estimation for local averaging i.e.*
 $m(x)$ *can be estimated with the product of* $Y_i$ *average and* $X_i$
 *is near to* $x$*. In other words, this means that we are discovering
 the line through the data points with the help of surrounding data
-points. The estimation formula is printed below [@R-base]:*
+points. The estimation formula is printed below:*
 
 $$
 M_n(x) = \sum_{i=1}^{n} W_n (X_i) Y_i  \tag{1}
@@ -94,7 +75,8 @@ $$
 
 -   Highlight unexpected patterns or anomalies.
 
-This report utilizes the Health + Wellness + Stress/Sleep Tracking dataset obtained from Kaggle. The dataset contains wearable health measurements and behavioral measurements for 300 simulated individuals over a 6 month period. Variables include but are not limited to: demographic characteristics, physical activity, sleep metrics, cardiovascular measurements, and stress score. This dataset is longitudinal and is suitable for analyzing physiological and behavioral predictors of stress using a linear mixed model. [@kaggle_dataset]
+
+This report utilizes the *Health + Wellness + Stress/Sleep Tracking* dataset obtained from Kaggle. The dataset contains wearable health measurements and behavioral measurements for 300 simulated individuals over a 6 month period. Variables include but are not limited to: demographic characteristics, physical activity, sleep metrics, cardiovascular measurements, and stress score. This dataset is longitudinal and is suitable for analyzing physiological and behavioral predictors of stress using a linear mixed model. [@kaggle_dataset]
 
 ```{r setup, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -370,6 +352,7 @@ ggplot(df, aes(x = stress_score)) +
 
 -   Explain your data preprocessing and cleaning steps.
 
+**Add modeling here**
 
 ### Results
 
@@ -379,11 +362,15 @@ ggplot(df, aes(x = stress_score)) +
 
 -   **Tell a story about what the data reveals.**
 
+**Add results discussion here**
+
 
 ### Conclusion
 
 -   Summarize your key findings.
 
 -   Discuss the implications of your results.
+
+**Add conclusion here**
 
 ## References
