@@ -18,19 +18,8 @@ editor:
     wrap: 72
 ---
 
-Slides: [slides.html](slides.html){target="_blank"} ( Go to `slides.qmd`
-to edit)
+Slides: [slides.html](slides.html){target="_blank"}
 
-::: callout-important
-**Remember:** Your goal is to make your audience understand and care
-about your findings. By crafting a compelling story, you can effectively
-communicate the value of your data science project.
-
-Carefully read this template since it has instructions and tips to
-writing!
-
-Nice report!
-:::
 
 ## Introduction
 
@@ -105,44 +94,284 @@ $$
 
 -   Highlight unexpected patterns or anomalies.
 
-A study was conducted to determine how...
+This report utilizes the Health + Wellness + Stress/Sleep Tracking dataset obtained from Kaggle. The dataset contains wearable health measurements and behavioral measurements for 300 simulated individuals over a 6 month period. Variables include but are not limited to: demographic characteristics, physical activity, sleep metrics, cardiovascular measurements, and stress score. This dataset is longitudinal and is suitable for analyzing physiological and behavioral predictors of stress using a linear mixed model. [@kaggle_dataset]
 
-```{r, warning=FALSE, echo=T, message=FALSE}
-# loading packages 
+```{r setup, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(knitr)
-library(ggthemes)
-library(ggrepel)
-library(dslabs)
+library(kableExtra)
+library(corrplot)
+library(lme4)
+library(lmerTest)
 ```
 
-```{python}
-import pandas as pd
-```
-
-```{r, warning=FALSE, echo=TRUE}
+```{r}
 # Load Data
-kable(head(murders))
 
-ggplot1 = murders %>% ggplot(mapping = aes(x=population/10^6, y=total)) 
+df = read_csv("wearables_health_6mo_daily.csv")
+```
 
-  ggplot1 + geom_point(aes(col=region), size = 4) +
-  geom_text_repel(aes(label=abb)) +
-  scale_x_log10() +
-  scale_y_log10() +
-  geom_smooth(formula = "y~x", method=lm,se = F)+
-  xlab("Populations in millions (log10 scale)") + 
-  ylab("Total number of murders (log10 scale)") +
-  ggtitle("US Gun Murders in 2010") +
-  scale_color_discrete(name = "Region")+
-      theme_bw()
-  
+```{r}
+# Quick overview of dataset
+
+dataset_overview <- tibble(
+  Metric = c("Total Observations", "Total Variables", "Unique Users"),
+  Value = c(
+    scales::comma(nrow(df)),
+    scales::comma(ncol(df)),
+    scales::comma(n_distinct(df$user_id))
+  )
+)
+
+dataset_overview %>%
+  kable(caption = "Dataset Overview") %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+#### Descriptive Statistics
+
+```{r}
+# Function to create descriptive statistics tables
+
+create_descriptive_table <- function(data, variables, caption) {
+
+  data %>%
+    select(all_of(variables)) %>%
+    pivot_longer(
+      cols = everything(),
+      names_to = "Variable",
+      values_to = "Value"
+    ) %>%
+    group_by(Variable) %>%
+    summarise(
+      Mean = round(mean(Value, na.rm = TRUE), 2),
+      SD = round(sd(Value, na.rm = TRUE), 2),
+      Min = round(min(Value, na.rm = TRUE), 2),
+      Median = round(median(Value, na.rm = TRUE), 2),
+      Max = round(max(Value, na.rm = TRUE), 2),
+      .groups = "drop"
+    ) %>%
+    kable(caption = caption) %>%
+    kable_styling(
+      bootstrap_options = c(
+        "striped",
+        "hover",
+        "condensed"
+      ),
+      full_width = FALSE
+    )
+}
+```
+
+```{r}
+# Demographic fields
+
+create_descriptive_table(
+  df,
+  c(
+    "age",
+    "height_cm",
+    "weight_kg",
+    "bmi"
+  ),
+  "Demographic Characteristics"
+)
+```
+
+```{r}
+# Physiological fields
+
+create_descriptive_table(
+  df,
+  c(
+    "resting_hr_bpm",
+    "avg_hr_day_bpm",
+    "hrv_rmssd_ms",
+    "spo2_avg_pct",
+    "sbp_mmHg",
+    "dbp_mmHg"
+  ),
+  "Physiological Characteristics"
+)
+```
+
+```{r}
+# Behavioral fields
+
+create_descriptive_table(
+  df,
+  c(
+    "steps",
+    "distance_km",
+    "calories_kcal",
+    "workout_minutes",
+    "caffeine_mg",
+    "alcohol_units",
+    "screen_time_min",
+    "mindfulness_minutes"
+  ),
+  "Behavioral Characteristics"
+)
+```
+
+```{r}
+# Sleep fields
+
+create_descriptive_table(
+  df,
+  c(
+    "sleep_duration_hours",
+    "sleep_efficiency",
+    "sleep_latency_min",
+    "wake_after_sleep_onset_min",
+    "sleep_stage_rem_pct",
+    "sleep_stage_deep_pct",
+    "sleep_stage_light_pct"
+  ),
+  "Sleep Characteristics"
+)
+```
+
+```{r}
+# Outcome variable
+
+create_descriptive_table(
+  df,
+  c(
+    "stress_score"
+  ),
+  "Stress Score Summary"
+)
+```
+
+#### Missing Values
+
+```{r}
+# Investigating missing values
+
+missing_values <- df %>%
+  summarise(across(everything(), ~sum(is.na(.)))) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "Variable",
+    values_to = "Missing_Values"
+  ) %>%
+  mutate(
+    Percent_Missing = round(100 * Missing_Values / nrow(df), 2)
+  ) %>%
+  arrange(desc(Missing_Values)) %>%
+  mutate(
+    Missing_Values = scales::comma(Missing_Values)
+  )
+
+missing_values %>%
+  kable(caption = "Missing Values by Variable") %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
 
 ```
 
-### Modeling and Results
+#### Categorical Fields
+
+```{r}
+# Function to graph frequencies of categorical data
+
+plot_categorical <- function(data, column) {
+
+  plot_data <- data %>%
+    count({{ column }}) %>%
+    mutate(
+      percent = round(100 * n / sum(n), 1),
+      label = paste0(
+        scales::comma(n),
+        "\n(",
+        percent,
+        "%)"
+      )
+    )
+
+  ggplot(
+    plot_data,
+    aes(
+      x = reorder(as.character({{ column }}), -n),
+      y = n
+    )
+  ) +
+    geom_col() +
+    geom_text(
+      aes(label = label),
+      vjust = -0.3,
+      size = 3.5
+    ) +
+    scale_y_continuous(
+      expand = expansion(mult = c(0, 0.15))
+    ) +
+    labs(
+      title = paste(
+        "Frequency of",
+        tools::toTitleCase(
+          gsub("_", " ", deparse(substitute(column)))
+        )
+      ),
+      x = NULL,
+      y = "Count"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(
+        face = "bold",
+        hjust = 0.5
+      ),
+      axis.text.x = element_text(
+        angle = 30,
+        hjust = 1
+      )
+    )
+}
+```
+
+```{r}
+# Apply graphing function
+
+plot_categorical(df, mood)
+
+plot_categorical(df, gender)
+
+plot_categorical(df, region)
+
+plot_categorical(df, workout_type)
+
+plot_categorical(df, device_model)
+```
+
+#### Stress Distribution
+
+```{r}
+# Investigating distribution of stress score within the dataset
+
+ggplot(df, aes(x = stress_score)) +
+  geom_histogram(bins = 20) +
+  labs(
+    title = "Distribution of Stress Scores",
+    subtitle = "Stress scores appear approximately normally distributed",
+    x = "Stress Score",
+    y = "Count"
+  ) +
+  theme_minimal()
+```
+
+
+### Modeling
 
 -   Explain your data preprocessing and cleaning steps.
+
+
+### Results
 
 -   Present your key findings in a clear and concise manner.
 
@@ -150,9 +379,6 @@ ggplot1 = murders %>% ggplot(mapping = aes(x=population/10^6, y=total))
 
 -   **Tell a story about what the data reveals.**
 
-```{r}
-
-```
 
 ### Conclusion
 
