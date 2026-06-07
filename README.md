@@ -1,21 +1,20 @@
-# Instructions
+# Modeling Physiological and Behavioral Predictors of Stress Using a Linear Mixed Model on Wearable Health Data
 
-Create a GitHub page for the project
+## Overview
 
-## GitHub:
-#### 1. Create a GitHub account and Sign in
-#### 2. Go to [https://github.com/capstone4ds/capstone4ds_template](https://github.com/capstone4ds/capstone4ds_template) and fork (create a copy to your GitHub)
-![fork](fork.png)
-#### 3. Change the name of the repo to *IDC6940_GroupName*
-#### 4. Go to *Settings* -> *Pages* -> under *Branch* -> select *main*
-#### 5. Wait for a few seconds and refresh the page. You see the link of the page. 
+This project investigates how physiological and behavioral health metrics collected from wearable devices can be used to predict stress levels over time. Using longitudinal wearable health data, a Linear Mixed Model (LMM) is developed to examine the relationship between stress and physiological and behavioral measurements. 
 
-## RStudio:
-#### 1. Go to RStudio
-#### 2. Create a Version Control Project and Clone the repo.
-#### 3. Commit and push to see changes on the website et Voilà!
+The goal of this study is to identify which wearable-derived metrics are most strongly associated with stress while accounting for repeated measurements collected from the same individuals over time.
 
-More information:
-- [GitHub](https://happygitwithr.com/index.html)
-- [Video1 RStudio connection to GitHub](https://www.youtube.com/watch?v=MdmnE3AnkQE)
-- [Video2 RStudio connection to GitHub](https://www.youtube.com/watch?v=jN6tvgt3GK8)
+## Research Question
+
+Which physiological and behavioral health metrics are significant predictors of stress levels in individuals monitored through wearable health devices?
+
+## Project Status
+
+In Progress
+
+Current Phase:
+- Gathering research papers
+- Writing introduction section
+- Exploring dataset
