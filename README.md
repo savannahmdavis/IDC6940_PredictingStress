@@ -1,10 +1,12 @@
 # Modeling Physiological and Behavioral Predictors of Stress Using a Linear Mixed Model on Wearable Health Data
 
+## Contributors
+
+Savannah Davis<br>Bryce Mattos<br>Jessica Jones<br>Jordan Gainey<br>(Advisor: Dr. Cohen)
+
 ## Overview
 
-This project investigates how physiological and behavioral health metrics collected from wearable devices can be used to predict stress levels over time. Using longitudinal wearable health data, a Linear Mixed Model (LMM) is developed to examine the relationship between stress and physiological and behavioral measurements. 
-
-The goal of this study is to identify which wearable-derived metrics are most strongly associated with stress while accounting for repeated measurements collected from the same individuals over time.
+This project investigates how physiological and behavioral health metrics collected from wearable devices can be used to predict stress levels. Using longitudinal wearable health data, a Linear Mixed Model (LMM) will be developed to examine the relationship between stress and physiological and behavioral metrics.
 
 ## Research Question
 
