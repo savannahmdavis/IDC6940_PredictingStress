@@ -85,6 +85,9 @@ library(kableExtra)
 library(corrplot)
 library(lme4)
 library(lmerTest)
+library(performance)
+library(broom.mixed)
+library(car)
 ```
 
 ```{r}
@@ -244,6 +247,9 @@ missing_values <- df %>%
   mutate(
     Percent_Missing = round(100 * Missing_Values / nrow(df), 2)
   ) %>%
+  filter(
+    Percent_Missing > 0
+  ) %>%
   arrange(desc(Missing_Values)) %>%
   mutate(
     Missing_Values = scales::comma(Missing_Values)
@@ -255,8 +261,36 @@ missing_values %>%
     bootstrap_options = c("striped", "hover", "condensed"),
     full_width = FALSE
   )
-
 ```
+
+```{r}
+# Count rows containing at least one missing value
+
+rows_with_missing <- sum(!complete.cases(df))
+
+# Calculate percentage of dataset removed
+
+pct_rows_removed <- round(
+  100 * rows_with_missing / nrow(df),
+  2
+)
+
+missing_summary <- tibble(
+  Total_Observations = scales::comma(nrow(df)),
+  Rows_With_Missing = scales::comma(rows_with_missing),
+  Percent_Removed = paste0(pct_rows_removed, "%")
+)
+
+missing_summary %>%
+  kable(
+    caption = "Impact of Missing Data Removal"
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
 
 #### Categorical Fields
 
@@ -352,7 +386,415 @@ ggplot(df, aes(x = stress_score)) +
 
 -   Explain your data preprocessing and cleaning steps.
 
-**Add modeling here**
+```{r}
+# Remove null values since there aren't many
+df_clean <- na.omit(df)
+
+# Convert categorical data to factor
+df_clean <- df_clean %>%
+  mutate(
+    user_id = as.factor(user_id),
+    gender = as.factor(gender),
+    region = as.factor(region),
+    device_model = as.factor(device_model),
+    workout_type = as.factor(workout_type),
+    mood = as.factor(mood)
+  )
+
+# Select all categorical variables
+categorical_vars <- df_clean %>%
+  select(
+    user_id,
+    gender,
+    region,
+    device_model,
+    workout_type,
+    mood
+  )
+
+# Select all continuous variables
+continuous_vars <- df_clean %>%
+  select(
+    age, height_cm, weight_kg, bmi, resting_hr_bpm,
+    avg_hr_day_bpm, hrv_rmssd_ms, spo2_avg_pct, sbp_mmHg,
+    dbp_mmHg, steps, distance_km, calories_kcal,
+    workout_minutes, caffeine_mg, alcohol_units, screen_time_min, 
+    sleep_duration_hours, sleep_efficiency, sleep_latency_min,
+    wake_after_sleep_onset_min, sleep_stage_rem_pct, sleep_stage_deep_pct, 
+    sleep_stage_light_pct, stress_score, mindfulness_minutes
+  )
+```
+
+```{r}
+# Calculate correlation matrix for continuous variables
+# Helps identify correlated variables before building model
+corr_matrix <- cor(
+  continuous_vars,
+  use = "complete.obs"
+)
+
+# Correlation heatmap
+corrplot(
+  corr_matrix,
+  method = "color",
+  type = "upper",
+  tl.cex = 0.7
+)
+```
+
+```{r}
+# Create table from the corr matrix
+corr_table <- as.data.frame(as.table(corr_matrix)) %>%
+  rename(
+    Variable1 = Var1,
+    Variable2 = Var2,
+    Correlation = Freq
+  ) %>%
+  filter(
+    as.character(Variable1) < as.character(Variable2)
+  ) %>%
+  mutate(
+    abs_corr = abs(Correlation)
+  ) %>%
+  arrange(desc(abs_corr))
+
+# Filter to only the highly correlated pairs and remove duplicate pairs
+corr_table %>%
+  filter(abs_corr >= 0.70) %>%
+  mutate(
+    Correlation = round(Correlation, 2)
+  ) %>%
+  select(
+    Variable1,
+    Variable2,
+    Correlation
+  ) %>%
+  kable(
+    caption = "Strong correlations among predictor variables"
+  ) %>%
+  kable_styling(full_width = FALSE)
+```
+
+
+```{r}
+# Build initial model with all variables (except ones with strong correlations)
+# Put user_id as the random effect
+
+lmm_full <- lmer(
+  stress_score ~
+    age +
+    gender +
+    region +
+    device_model +
+    workout_type +
+    bmi +
+    resting_hr_bpm +
+    hrv_rmssd_ms +
+    spo2_avg_pct +
+    sbp_mmHg +
+    dbp_mmHg +
+    distance_km +
+    workout_minutes +
+    caffeine_mg +
+    alcohol_units +
+    screen_time_min +
+    mindfulness_minutes +
+    sleep_duration_hours +
+    sleep_efficiency +
+    sleep_latency_min +
+    wake_after_sleep_onset_min +
+    (1 | user_id),
+  data = df_clean
+)
+
+summary(lmm_full)
+```
+
+
+```{r}
+# Test mutlicollinearity using VIF
+
+vif_full <- vif(
+  lm(
+    stress_score ~
+      age +
+      gender +
+      region +
+      device_model +
+      workout_type +
+      bmi +
+      resting_hr_bpm +
+      hrv_rmssd_ms +
+      spo2_avg_pct +
+      sbp_mmHg +
+      dbp_mmHg +
+      distance_km +
+      workout_minutes +
+      caffeine_mg +
+      alcohol_units +
+      screen_time_min +
+      mindfulness_minutes +
+      sleep_duration_hours +
+      sleep_efficiency +
+      sleep_latency_min +
+      wake_after_sleep_onset_min,
+    data = df_clean
+  )
+)
+
+vif_full
+```
+
+
+```{r}
+# Test model after taking out region and device_model because they were not meaningful
+
+lmm_no_region_device <- lmer(
+  stress_score ~
+    age +
+    gender +
+    workout_type +
+    bmi +
+    resting_hr_bpm +
+    hrv_rmssd_ms +
+    spo2_avg_pct +
+    sbp_mmHg +
+    dbp_mmHg +
+    distance_km +
+    workout_minutes +
+    caffeine_mg +
+    alcohol_units +
+    screen_time_min +
+    mindfulness_minutes +
+    sleep_duration_hours +
+    sleep_efficiency +
+    sleep_latency_min +
+    wake_after_sleep_onset_min +
+    (1 | user_id),
+  data = df_clean
+)
+
+summary(lmm_no_region_device)
+```
+
+
+```{r}
+# Reduced model version 1 after getting rid of irrelevant variables
+# Variables with weak effects and little explanatory value were removed
+
+lmm_reduced <- lmer(
+  stress_score ~
+    workout_type +
+    hrv_rmssd_ms +
+    distance_km +
+    caffeine_mg +
+    alcohol_units +
+    screen_time_min +
+    mindfulness_minutes +
+    sleep_duration_hours +
+    sleep_efficiency +
+    wake_after_sleep_onset_min +
+    (1 | user_id),
+  data = df_clean
+)
+
+summary(lmm_reduced)
+```
+
+```{r}
+# Test taking out workout_type to see if it contributes to model fit
+lmm_reduced_2 <- lmer(
+  stress_score ~
+    hrv_rmssd_ms +
+    distance_km +
+    caffeine_mg +
+    alcohol_units +
+    screen_time_min +
+    mindfulness_minutes +
+    sleep_duration_hours +
+    sleep_efficiency +
+    wake_after_sleep_onset_min +
+    (1 | user_id),
+  data = df_clean
+)
+
+# Refit both models with maximum likelihood estimation (ML)
+lmm_reduced_ml <- update(
+  lmm_reduced,
+  REML = FALSE
+)
+
+lmm_reduced_2_ml <- update(
+  lmm_reduced_2,
+  REML = FALSE
+)
+
+# Run anova
+anova(
+  lmm_reduced_2_ml,
+  lmm_reduced_ml
+)
+```
+
+```{r}
+# Test removing wake_after_sleep_onset_min to see if it contributes to model fit
+
+lmm_reduced_3 <- lmer(
+  stress_score ~
+    workout_type +
+    hrv_rmssd_ms +
+    distance_km +
+    caffeine_mg +
+    alcohol_units +
+    screen_time_min +
+    mindfulness_minutes +
+    sleep_duration_hours +
+    sleep_efficiency +
+    (1 | user_id),
+  data = df_clean
+)
+
+# Refit model with maximum likelihood estimation (ML)
+lmm_reduced_3_ml <- update(
+  lmm_reduced_3,
+  REML = FALSE
+)
+
+# Run anova
+anova(
+  lmm_reduced_3_ml,
+  lmm_reduced_ml
+)
+```
+
+
+```{r}
+# Build final model
+# The final predictor set was determined through iterative model reduction
+
+lmm_final <- lmer(
+  stress_score ~
+    workout_type +
+    hrv_rmssd_ms +
+    distance_km +
+    caffeine_mg +
+    alcohol_units +
+    screen_time_min +
+    mindfulness_minutes +
+    sleep_duration_hours +
+    sleep_efficiency +
+    wake_after_sleep_onset_min +
+    (1 | user_id),
+  data = df_clean
+)
+
+summary(lmm_final)
+```
+
+
+```{r}
+# Evaluate model assumptions and overall fit
+plot(lmm_final)
+
+qqnorm(residuals(lmm_final))
+qqline(residuals(lmm_final))
+```
+
+```{r}
+# The random intercepts should be approximately normally distributed
+qqnorm(ranef(lmm_final)$user_id[,1])
+qqline(ranef(lmm_final)$user_id[,1])
+```
+
+```{r}
+# Check model diagnostics
+check_model(lmm_final, check = "qq")
+check_model(lmm_final, check = "homogeneity")
+check_model(lmm_final, check = "linearity")
+check_model(lmm_final, check = "outliers")
+```
+
+
+```{r}
+# Create an 80/20 train-test split at the user level
+# Splitting by user prevents observations from the same participant appearing in both datasets
+
+set.seed(1021)
+
+users <- unique(df_clean$user_id)
+
+train_users <- sample(
+  users,
+  size = round(length(users) * 0.80)
+)
+
+# Assign observations from training users to the training dataset
+train_data <- df_clean %>%
+  filter(user_id %in% train_users)
+
+# Assign observations from held-out users to the testing dataset
+test_data <- df_clean %>%
+  filter(!user_id %in% train_users)
+
+# Verify the number of unique users in each partition
+length(unique(train_data$user_id))
+length(unique(test_data$user_id))
+
+# Verify the number of observations in each partition
+nrow(train_data)
+nrow(test_data)
+```
+
+```{r}
+# Check to make sure there are only unique users in train and test split
+length(
+  intersect(
+    unique(train_data$user_id),
+    unique(test_data$user_id)
+  )
+)
+```
+
+```{r}
+# Use the final model from before and build it from train dataset
+lmm_train <- lmer(
+  stress_score ~
+    workout_type +
+    hrv_rmssd_ms +
+    distance_km +
+    caffeine_mg +
+    alcohol_units +
+    screen_time_min +
+    mindfulness_minutes +
+    sleep_duration_hours +
+    sleep_efficiency +
+    wake_after_sleep_onset_min +
+    (1 | user_id),
+  data = train_data
+)
+```
+
+
+```{r}
+# Predict on our test data
+test_pred <- predict(
+  lmm_train,
+  newdata = test_data,
+  allow.new.levels = TRUE
+)
+```
+
+```{r}
+# Evaluate predictive performance on the test dataset
+
+actual <- test_data$stress_score
+
+rmse <- sqrt(mean((actual - test_pred)^2))
+
+mae <- mean(abs(actual - test_pred))
+
+r2_test <- cor(actual, test_pred)^2
+```
 
 ### Results
 
@@ -363,6 +805,134 @@ ggplot(df, aes(x = stress_score)) +
 -   **Tell a story about what the data reveals.**
 
 **Add results discussion here**
+
+```{r}
+# Plot predicted vs actual stress score to measure performance of model
+ggplot(
+  data.frame(actual, test_pred),
+  aes(x = actual, y = test_pred)
+) +
+  geom_point(
+    alpha = 0.05,
+    size = 1
+  ) +
+  geom_abline(
+    slope = 1,
+    intercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    title = "Predicted vs Actual Stress Scores",
+    x = "Actual Stress Score",
+    y = "Predicted Stress Score"
+  ) +
+  theme_minimal()
+```
+
+
+```{r}
+# This table summarizes the statistical significance of each predictor retained in the final model
+
+coef_table <- broom.mixed::tidy(lmm_final)
+
+coef_table %>%
+  filter(effect == "fixed") %>%
+  select(
+    term,
+    estimate,
+    std.error,
+    statistic,
+    p.value
+  ) %>%
+  mutate(
+    across(
+      c(estimate, std.error, statistic),
+      ~ round(.x, 3)
+    ),
+    p.value = ifelse(
+      p.value < .001,
+      "<0.001",
+      round(p.value, 3)
+    )
+  ) %>%
+  kable(
+    caption = "Fixed Effects from Final Linear Mixed Model"
+  ) %>%
+  kable_styling(
+    bootstrap_options = c(
+      "striped",
+      "hover",
+      "condensed"
+    )
+  )
+```
+
+```{r}
+# Calculate final model performance metrics
+
+r2_vals <- r2(lmm_final)
+icc_val <- icc(lmm_final)
+
+performance_table <- tibble(
+  Metric = c(
+    "Marginal R²",
+    "Conditional R²",
+    "ICC",
+    "AIC",
+    "Users",
+    "Observations"
+  ),
+  Value = c(
+    round(r2_vals$R2_marginal, 3),
+    round(r2_vals$R2_conditional, 3),
+    round(icc_val$ICC_adjusted, 3),
+    round(AIC(lmm_final), 1),
+    length(unique(df_clean$user_id)),
+    nrow(df_clean)
+  )
+)
+
+performance_table %>%
+  kable(
+    caption = "Final Model Performance Metrics"
+  ) %>%
+  kable_styling(
+    bootstrap_options = c(
+      "striped",
+      "hover",
+      "condensed"
+    )
+  )
+```
+
+```{r}
+# Summarize predictive performance on the test dataset
+
+prediction_table <- tibble(
+  Metric = c(
+    "Test R²",
+    "RMSE",
+    "MAE"
+  ),
+  Value = c(
+    round(r2_test, 3),
+    round(rmse, 3),
+    round(mae, 3)
+  )
+)
+
+prediction_table %>%
+  kable(
+    caption = "Prediction Performance on Test Data"
+  ) %>%
+  kable_styling(
+    bootstrap_options = c(
+      "striped",
+      "hover",
+      "condensed"
+    )
+  )
+```
 
 
 ### Conclusion
