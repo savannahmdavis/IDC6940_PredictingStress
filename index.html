@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Savannah Davis Bryce Mattos Jessica Jones Jordan Gainey (Advisor: Dr. Cohen)">
-<meta name="dcterms.date" content="2026-06-14">
+<meta name="dcterms.date" content="2026-06-22">
 
 <title>Modeling Physiological and Behavioral Predictors of Stress Using a Linear Mixed Model on Wearable Health Data</title>
 <style>
@@ -2609,7 +2609,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">June 14, 2026</p>
+      <p class="date">June 22, 2026</p>
     </div>
   </div>
   
@@ -2632,7 +2632,7 @@ window.Quarto = {
 <li><p>Introduce why it is relevant needs.</p></li>
 <li><p>Provide an overview of your approach.</p></li>
 </ul>
-<p><strong>Add intro here</strong></p>
+<p>Stress is a state where the emotional, psychological, or physiological systems of an individual experience a demand that exceeds their knowledge and ability to resolve. Whether perceived consciously or unconsciously, the body then responds by prompting organs and glands to produce hormones that will assist the individual in adapting to the situation. Normal physiological responses to acute stress are short-lived and allow the body to return to its natural state without any long-term consequences. However, chronic stress, which is the result of unresolved long-standing demands and challenges can result in physical complications and disease in the body <span class="citation" data-cites="can2022survey">(<a href="#ref-can2022survey" role="doc-biblioref">Can et al. 2022</a>)</span>. In fact, the effects of chronic stress are so serious that research in Europe showed stress as the second most severe work-related health issue <span class="citation" data-cites="can2022survey">(<a href="#ref-can2022survey" role="doc-biblioref">Can et al. 2022</a>)</span>. Insights on stress can of course be self-reported by individuals, however, more efficient and accurate means of tracking stress can be accomplished via wearable devices such as Fitbit, Garmin, etc. Wearable devices can collect a wide range of data such as: heart rate, heart rate variability(HRV), sleep quality, physical activity, and movement patterns <span class="citation" data-cites="namvari2022ppg wang2024heart">(<a href="#ref-namvari2022ppg" role="doc-biblioref">Namvari et al. 2022</a>; <a href="#ref-wang2024heart" role="doc-biblioref">Wang et al. 2024</a>)</span>. Out of those variables, researchers select the physiological ones that are directly influenced by the autonomic nervous system (ANS), mainly because stress is fundamentally an ANS response. The ANS regulates involuntary bodily functions and also consists of the sympathetic(SNS) and parasympathetic nervous systems(PNS) which maintain homeostasis within the body <span class="citation" data-cites="chalmers2022sleep">(<a href="#ref-chalmers2022sleep" role="doc-biblioref">Chalmers et al. 2022</a>)</span>. During periods of stress, the SNS activates which results in elevated heart rates and changes in HRV, which makes those the perfect variables to include in stress prediction research. Additionally, sleep, physical activity, circadian rhythms, and environmental conditions also contribute to stress and researchers often incorporate them when developing stress prediction models<span class="citation" data-cites="wang2024heart">(<a href="#ref-wang2024heart" role="doc-biblioref">Wang et al. 2024</a>)</span>. While physiological variables such as heart rate and HRV provide valuable information into how the body responds to stress, researchers have found that behavioral and lifestyle factors also contribute to stress levels. Sleep duration, sleep quality, sleep efficiency, screen time, caffeine consumption, alcohol use, and mindfulness practices all have been shown to affect overall well-being <span class="citation" data-cites="vidalbustamante2024sleep booth2022stress">(<a href="#ref-vidalbustamante2024sleep" role="doc-biblioref">Vidal Bustamante et al. 2024</a>; <a href="#ref-booth2022stress" role="doc-biblioref">Booth et al. 2022</a>)</span>. Out of those listed factors, sleep has been identified as one of the strongest predictors of perceived stress, as disruptions influence an individuals ability to adapt to daily demands <span class="citation" data-cites="bloomfield2024sleep">(<a href="#ref-bloomfield2024sleep" role="doc-biblioref">Bloomfield 2024</a>)</span>. So, to increase the accuracy of stress prediction, researchers have concluded that combining physiological signals with lifestyle factors improves the ability to predict persons experiencing higher levels of stress <span class="citation" data-cites="sano2018markers">(<a href="#ref-sano2018markers" role="doc-biblioref">Sano et al. 2018</a>)</span>.</p>
 </section>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
@@ -2728,6 +2728,7 @@ y_i = \beta_0 + \beta_1 X_1 +\varepsilon_i
 </table>
 </div>
 </div>
+<p>The raw dataset contains over 55k records for 300 distinct users, with over 30 variables to choose to build the model from.</p>
 <section id="descriptive-statistics" class="level4">
 <h4 class="anchored" data-anchor-id="descriptive-statistics">Descriptive Statistics</h4>
 <div class="cell">
@@ -2765,6 +2766,7 @@ y_i = \beta_0 + \beta_1 X_1 +\varepsilon_i
 <span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
+<p>The variables in the dataset are split into several different categories to assist in choosing variables of interest. Descriptive statistics tables will be created for each category including the mean, standard deviation, minimum, median, and maximum values.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -3152,6 +3154,7 @@ y_i = \beta_0 + \beta_1 X_1 +\varepsilon_i
 </section>
 <section id="missing-values" class="level4">
 <h4 class="anchored" data-anchor-id="missing-values">Missing Values</h4>
+<p>The dataset is investigated for missing values to assess next steps for preprocessing.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -3306,6 +3309,7 @@ y_i = \beta_0 + \beta_1 X_1 +\varepsilon_i
 </table>
 </div>
 </div>
+<p>It is revealed that less than 2% of the dataset contains missing values across categories such as the physiological, behavioral, and sleep characteristic fields.</p>
 </section>
 <section id="categorical-fields" class="level4">
 <h4 class="anchored" data-anchor-id="categorical-fields">Categorical Fields</h4>
@@ -3368,6 +3372,7 @@ y_i = \beta_0 + \beta_1 X_1 +\varepsilon_i
 <span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
+<p>The categorical fields are explored to determine the frequencies in each category.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -3430,6 +3435,7 @@ y_i = \beta_0 + \beta_1 X_1 +\varepsilon_i
 </section>
 <section id="stress-distribution" class="level4">
 <h4 class="anchored" data-anchor-id="stress-distribution">Stress Distribution</h4>
+<p>The outcome field is explored to determine distribution.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -3457,9 +3463,6 @@ y_i = \beta_0 + \beta_1 X_1 +\varepsilon_i
 </section>
 <section id="modeling" class="level3">
 <h3 class="anchored" data-anchor-id="modeling">Modeling</h3>
-<ul>
-<li>Explain your data preprocessing and cleaning steps.</li>
-</ul>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -3527,6 +3530,7 @@ y_i = \beta_0 + \beta_1 X_1 +\varepsilon_i
 </div>
 </div>
 </div>
+<p>The correlation heatmap reveals several fields that need to be investigated further to determine the strength of the correlation. If certain fields are highly correlated, then one may be chosen to be left out of the model to reduce redundancy.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -3616,6 +3620,8 @@ y_i = \beta_0 + \beta_1 X_1 +\varepsilon_i
 </table>
 </div>
 </div>
+<p>The steps and distance fields are highly correlated which makes sense. Another obvious pair is the bmi and weight fields. Interestingly, the steps and deep sleep stage percentage fields are strongly correlated.</p>
+<p>The first model is built which includes all fields except for the pairs of strongly correlated fields.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -3758,6 +3764,7 @@ Some predictor variables are on very different scales: consider rescaling.
 You may also use (g)lmerControl(autoscale = TRUE) to improve numerical stability.</code></pre>
 </div>
 </div>
+<p>Multicollinearity is tested using VIF.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -4766,6 +4773,30 @@ You may also use (g)lmerControl(autoscale = TRUE) to improve numerical stability
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-kaggle_dataset" class="csl-entry" role="listitem">
 Akarsu, Meftun. 2025. <span>“Health + Wearables + Stress/Sleep Tracking (Synthetic).”</span> Version 1. Kaggle. <a href="https://www.kaggle.com/datasets/mftnakrsu/health-wearables-stresssleep-tracking-syntc/data">https://www.kaggle.com/datasets/mftnakrsu/health-wearables-stresssleep-tracking-syntc/data</a>.
+</div>
+<div id="ref-bloomfield2024sleep" class="csl-entry" role="listitem">
+Bloomfield, Mikaela I. AND Kim, Laura S. P. AND Fudolig. 2024. <span>“Predicting Stress in First-Year College Students Using Sleep Data from Wearable Devices.”</span> <em>PLOS Digital Health</em> 3 (4): 1–16. <a href="https://doi.org/10.1371/journal.pdig.0000473">https://doi.org/10.1371/journal.pdig.0000473</a>.
+</div>
+<div id="ref-booth2022stress" class="csl-entry" role="listitem">
+Booth, B. M., H. Vrzakova, S. M. Mattingly, G. J. Martinez, L. Faust, and S. K. D’Mello. 2022. <span>“Toward Robust Stress Prediction in the Age of Wearables: Modeling Perceived Stress in a Longitudinal Study with Information Workers.”</span> <em>IEEE Transactions on Affective Computing</em> 13 (4): 2201–17. <a href="https://doi.org/10.1109/TAFFC.2022.3188006">https://doi.org/10.1109/TAFFC.2022.3188006</a>.
+</div>
+<div id="ref-can2022survey" class="csl-entry" role="listitem">
+Can, Y. S., B. Arnrich, and C. Ersoy. 2022. <span>“Stress Detection in Daily Life Scenarios Using Smart Phones and Wearable Sensors: A Survey.”</span> <em>Journal of Biomedical Informatics</em> 134: 104205.
+</div>
+<div id="ref-chalmers2022sleep" class="csl-entry" role="listitem">
+Chalmers, T., B. A. Hickey, P. Newton, et al. 2022. <span>“Associations Between Sleep Quality and Heart Rate Variability: Implications for a Biological Model of Stress Detection Using Wearable Technology.”</span> <em>International Journal of Environmental Research and Public Health</em> 19 (9): 5770. <a href="https://doi.org/10.3390/ijerph19095770">https://doi.org/10.3390/ijerph19095770</a>.
+</div>
+<div id="ref-namvari2022ppg" class="csl-entry" role="listitem">
+Namvari, M., J. Lipoth, S. Knight, et al. 2022. <span>“Photoplethysmography Enabled Wearable Devices and Stress Detection: A Scoping Review.”</span> <em>Journal of Personalized Medicine</em> 12 (11): 1792. <a href="https://doi.org/10.3390/jpm12111792">https://doi.org/10.3390/jpm12111792</a>.
+</div>
+<div id="ref-sano2018markers" class="csl-entry" role="listitem">
+Sano, A., S. Taylor, A. W. McHill, et al. 2018. <span>“Identifying Objective Physiological Markers and Modifiable Behaviors for Self-Reported Stress and Mental Health Status Using Wearable Sensors and Mobile Phones: Observational Study.”</span> <em>Journal of Medical Internet Research</em> 20 (6): e210. <a href="https://doi.org/10.2196/jmir.9410">https://doi.org/10.2196/jmir.9410</a>.
+</div>
+<div id="ref-vidalbustamante2024sleep" class="csl-entry" role="listitem">
+Vidal Bustamante, C. M., G. Coombs III, H. Rahimi-Eichi, et al. 2024. <span>“Precision Assessment of Real-World Associations Between Stress and Sleep Duration Using Actigraphy Data Collected Continuously for an Academic Year: Individual-Level Modeling Study.”</span> <em>JMIR Formative Research</em> 8: e53441. <a href="https://doi.org/10.2196/53441">https://doi.org/10.2196/53441</a>.
+</div>
+<div id="ref-wang2024heart" class="csl-entry" role="listitem">
+Wang, R., O. Rezaeian, O. Asan, L. Zhang, and T. Liao. 2024. <span>“Relationship Between Heart Rate and Perceived Stress in Intensive Care Unit Residents: Exploratory Analysis Using Fitbit Data.”</span> <em>JMIR Formative Research</em> 8: e60759. <a href="https://doi.org/10.2196/60759">https://doi.org/10.2196/60759</a>.
 </div>
 </div></section></div></main>
 <!-- /main column -->

@@ -35,7 +35,10 @@ The introduction should:
 
 -   Provide an overview of your approach.
 
-**Add intro here**
+Stress is a state where the emotional, psychological, or physiological systems of an individual experience a demand that exceeds their knowledge and ability to resolve. Whether perceived consciously or unconsciously, the body then responds by prompting organs and glands to produce hormones that will assist the individual in adapting to the situation. Normal physiological responses to acute stress are short-lived and allow the body to return to its natural state without any long-term consequences. However, chronic stress, which is the result of unresolved long-standing demands and challenges can result in physical complications and disease in the body [@can2022survey]. In fact, the effects of chronic stress are so serious that research in Europe showed stress as the second most severe work-related health issue [@can2022survey]. Insights on stress can of course be self-reported by individuals, however, more efficient and accurate means of tracking stress can be accomplished via wearable devices such as Fitbit, Garmin, etc.
+	Wearable devices can collect a wide range of data such as: heart rate, heart rate variability(HRV), sleep quality, physical activity, and movement patterns [@namvari2022ppg; @wang2024heart]. Out of those variables, researchers select the physiological ones that are directly influenced by the autonomic nervous system (ANS), mainly because stress is fundamentally an ANS response. The ANS regulates involuntary bodily functions and also consists of the sympathetic(SNS) and parasympathetic nervous systems(PNS) which maintain homeostasis within the body [@chalmers2022sleep]. During periods of stress, the SNS activates which results in elevated heart rates and changes in HRV, which makes those the perfect variables to include in stress prediction research. Additionally, sleep, physical activity, circadian rhythms, and environmental conditions also contribute to stress and researchers often incorporate them when developing stress prediction models[@wang2024heart].
+	While physiological variables such as heart rate and HRV provide valuable information into how the body responds to stress, researchers have found that behavioral and lifestyle factors also contribute to stress levels. Sleep duration, sleep quality, sleep efficiency, screen time, caffeine consumption, alcohol use, and mindfulness practices all have been shown to affect overall well-being [@vidalbustamante2024sleep; @booth2022stress]. Out of those listed factors, sleep has been identified as one of the strongest predictors of perceived stress, as disruptions influence an individuals ability to adapt to daily demands [@bloomfield2024sleep]. So, to increase the accuracy of stress prediction, researchers have concluded that combining physiological signals with lifestyle factors improves the ability to predict persons experiencing higher levels of stress [@sano2018markers].
+
 
 
 ## Methods
@@ -116,6 +119,8 @@ dataset_overview %>%
   )
 ```
 
+The raw dataset contains over 55k records for 300 distinct users, with over 30 variables to choose to build the model from.
+
 #### Descriptive Statistics
 
 ```{r}
@@ -151,6 +156,9 @@ create_descriptive_table <- function(data, variables, caption) {
 }
 ```
 
+The variables in the dataset are split into several different categories to assist in choosing variables of interest. Descriptive statistics tables will be created for each category including the mean, standard deviation, 
+minimum, median, and maximum values.
+
 ```{r}
 # Demographic fields
 
@@ -165,6 +173,7 @@ create_descriptive_table(
   "Demographic Characteristics"
 )
 ```
+
 
 ```{r}
 # Physiological fields
@@ -234,6 +243,8 @@ create_descriptive_table(
 
 #### Missing Values
 
+The dataset is investigated for missing values to assess next steps for preprocessing.
+
 ```{r}
 # Investigating missing values
 
@@ -291,6 +302,7 @@ missing_summary %>%
   )
 ```
 
+It is revealed that less than 2% of the dataset contains missing values across categories such as the physiological, behavioral, and sleep characteristic fields.
 
 #### Categorical Fields
 
@@ -351,6 +363,8 @@ plot_categorical <- function(data, column) {
 }
 ```
 
+The categorical fields are explored to determine the frequencies in each category.
+
 ```{r}
 # Apply graphing function
 
@@ -366,6 +380,8 @@ plot_categorical(df, device_model)
 ```
 
 #### Stress Distribution
+
+The outcome field is explored to determine distribution.
 
 ```{r}
 # Investigating distribution of stress score within the dataset
@@ -384,7 +400,6 @@ ggplot(df, aes(x = stress_score)) +
 
 ### Modeling
 
--   Explain your data preprocessing and cleaning steps.
 
 ```{r}
 # Remove null values since there aren't many
@@ -425,6 +440,7 @@ continuous_vars <- df_clean %>%
   )
 ```
 
+
 ```{r}
 # Calculate correlation matrix for continuous variables
 # Helps identify correlated variables before building model
@@ -441,6 +457,8 @@ corrplot(
   tl.cex = 0.7
 )
 ```
+
+The correlation heatmap reveals several fields that need to be investigated further to determine the strength of the correlation. If certain fields are highly correlated, then one may be chosen to be left out of the model to reduce redundancy.
 
 ```{r}
 # Create table from the corr matrix
@@ -475,6 +493,10 @@ corr_table %>%
   kable_styling(full_width = FALSE)
 ```
 
+The steps and distance fields are highly correlated which makes sense. Another obvious pair is the bmi and weight fields. Interestingly, the steps and deep sleep stage percentage fields are strongly correlated.
+
+
+The first model is built which includes all fields except for the pairs of strongly correlated fields.
 
 ```{r}
 # Build initial model with all variables (except ones with strong correlations)
@@ -511,6 +533,8 @@ summary(lmm_full)
 ```
 
 
+Multicollinearity is tested using VIF.
+
 ```{r}
 # Test mutlicollinearity using VIF
 
@@ -544,6 +568,7 @@ vif_full <- vif(
 
 vif_full
 ```
+
 
 
 ```{r}
