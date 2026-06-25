@@ -75,7 +75,7 @@ $$
 
 ### Data Exploration and Visualization
 
-This report utilizes the *Health + Wellness + Stress/Sleep Tracking* dataset obtained from Kaggle. The dataset contains wearable health measurements and behavioral measurements for 300 simulated individuals over a 6 month period. The dataset contains demographic, physiological, behavioral, and sleep-related variables collected daily from wearable devices. This dataset is longitudinal and is suitable for analyzing physiological and behavioral predictors of stress using a linear mixed model. [@kaggle_dataset]
+This report utilizes the *Health + Wellness + Stress/Sleep Tracking* dataset obtained from Kaggle. The dataset contains wearable health measurements and behavioral measurements for 300 simulated individuals over a 6 month period. The dataset contains demographic, physiological, behavioral, and sleep-related variables collected daily from wearable devices. A linear mixed model is appropriate for this dataset because observations from the same participant are not independent, violating a key assumption of ordinary linear regression. [@kaggle_dataset]
 
 ```{r setup, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -769,7 +769,9 @@ performance_table %>%
   )
 ```
 
-The table above summarizes the overall fit of the final linear mixed model. The marginal R² of 0.726 indicates that the fixed effects explained approximately 72.6% of the variation in stress scores. The conditional R² was nearly identical (0.729), showing that adding the participant-specific random effect only slightly increased the amount of explained variation. This is supported by the ICC of 0.013, which indicates that only about 1.3% of the total variation in stress scores was due to differences between participants. Overall, these results suggest that the physiological and behavioral variables included in the model explained a large proportion of the variation in stress scores, while differences between individual participants contributed relatively little. The final model was fit using data from 300 participants and 54,143 observations.
+The table above summarizes the overall fit of the final linear mixed model. The marginal R² of 0.726 indicates that the fixed effects explained approximately 72.6% of the variation in stress scores. The conditional R² was nearly identical (0.729), showing that adding the participant-specific random effect only slightly increased the amount of explained variation. Although the ICC was relatively small (0.013), a linear mixed model remained appropriate because the dataset contained repeated observations from the same individuals. The random intercept accounts for the correlation among measurements collected from the same participant, even when the amount of between-person variation is relatively small.
+
+Overall, these results suggest that the physiological and behavioral variables included in the model explained a large proportion of the variation in stress scores, while differences between individual participants contributed relatively little. The final model was fit using data from 300 participants and 54,143 observations.
 
 
 ```{r}
