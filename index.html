@@ -2653,7 +2653,7 @@ y_i = \beta_0 + \beta_1 X_1 +\varepsilon_i
 <h2 class="anchored" data-anchor-id="analysis-and-results">Analysis and Results</h2>
 <section id="data-exploration-and-visualization" class="level3">
 <h3 class="anchored" data-anchor-id="data-exploration-and-visualization">Data Exploration and Visualization</h3>
-<p>This report utilizes the <em>Health + Wellness + Stress/Sleep Tracking</em> dataset obtained from Kaggle. The dataset contains wearable health measurements and behavioral measurements for 300 simulated individuals over a 6 month period. Variables include but are not limited to: demographic characteristics, physical activity, sleep metrics, cardiovascular measurements, and stress score. This dataset is longitudinal and is suitable for analyzing physiological and behavioral predictors of stress using a linear mixed model. <span class="citation" data-cites="kaggle_dataset">(<a href="#ref-kaggle_dataset" role="doc-biblioref">Akarsu 2025</a>)</span></p>
+<p>This report utilizes the <em>Health + Wellness + Stress/Sleep Tracking</em> dataset obtained from Kaggle. The dataset contains wearable health measurements and behavioral measurements for 300 simulated individuals over a 6 month period. The dataset contains demographic, physiological, behavioral, and sleep-related variables collected daily from wearable devices. This dataset is longitudinal and is suitable for analyzing physiological and behavioral predictors of stress using a linear mixed model. <span class="citation" data-cites="kaggle_dataset">(<a href="#ref-kaggle_dataset" role="doc-biblioref">Akarsu 2025</a>)</span></p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -3304,7 +3304,7 @@ y_i = \beta_0 + \beta_1 X_1 +\varepsilon_i
 </table>
 </div>
 </div>
-<p>It is revealed that less than 2% of the dataset contains missing values across categories such as the physiological, behavioral, and sleep characteristic fields.</p>
+<p>It is revealed that less than 2% of the dataset contains missing values across categories such as the physiological, behavioral, and sleep characteristic fields. Because only 1.91% of observations contained missing values, complete-case analysis was considered appropriate and unlikely to meaningfully affect the results.</p>
 </section>
 <section id="categorical-fields" class="level4">
 <h4 class="anchored" data-anchor-id="categorical-fields">Categorical Fields</h4>
@@ -4042,7 +4042,7 @@ You may also use (g)lmerControl(autoscale = TRUE) to improve numerical stability
 </div>
 </div>
 </div>
-<p>The graph above compares the predicted stress scores to the actual stress scores for the testing dataset. Most of the points fall close to the dashed line, showing that the model generally predicts stress well. However, there is still some spread around the line, meaning the predictions are not exact for every observation.</p>
+<p>The graph above compares the predicted stress scores to the actual stress scores for the testing dataset. Most of the points fall close to the dashed line, showing that the predicted values generally followed the observed stress scores. However, there is still some spread around the line, meaning the predictions are not exact for every observation.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>

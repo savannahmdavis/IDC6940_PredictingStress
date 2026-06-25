@@ -75,7 +75,7 @@ $$
 
 ### Data Exploration and Visualization
 
-This report utilizes the *Health + Wellness + Stress/Sleep Tracking* dataset obtained from Kaggle. The dataset contains wearable health measurements and behavioral measurements for 300 simulated individuals over a 6 month period. Variables include but are not limited to: demographic characteristics, physical activity, sleep metrics, cardiovascular measurements, and stress score. This dataset is longitudinal and is suitable for analyzing physiological and behavioral predictors of stress using a linear mixed model. [@kaggle_dataset]
+This report utilizes the *Health + Wellness + Stress/Sleep Tracking* dataset obtained from Kaggle. The dataset contains wearable health measurements and behavioral measurements for 300 simulated individuals over a 6 month period. The dataset contains demographic, physiological, behavioral, and sleep-related variables collected daily from wearable devices. This dataset is longitudinal and is suitable for analyzing physiological and behavioral predictors of stress using a linear mixed model. [@kaggle_dataset]
 
 ```{r setup, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -298,7 +298,7 @@ missing_summary %>%
   )
 ```
 
-It is revealed that less than 2% of the dataset contains missing values across categories such as the physiological, behavioral, and sleep characteristic fields.
+It is revealed that less than 2% of the dataset contains missing values across categories such as the physiological, behavioral, and sleep characteristic fields. Because only 1.91% of observations contained missing values, complete-case analysis was considered appropriate and unlikely to meaningfully affect the results.
 
 #### Categorical Fields
 
@@ -490,7 +490,6 @@ corr_table %>%
 ```
 
 As expected, steps and distance are highly correlated since both measure daily physical activity. Similarly, BMI and weight are strongly correlated because BMI is calculated using weight and height. Rather than including both variables in the model, one variable from each highly correlated pair is retained to reduce redundancy. An interesting finding is the strong relationship between steps and deep sleep percentage, suggesting that individuals who were more physically active also tended to spend a greater proportion of sleep in the deep sleep stage.
-
 
 
 The full linear mixed model was fit using all remaining variables after removing the highly correlated predictors identified in the correlation analysis. The initial model gives a starting point for determining which variables contribute the most to predicting stress and which variables can be removed to simplify the model.
@@ -687,7 +686,7 @@ ggplot(
   ) +
   theme_minimal()
 ```
-The graph above compares the predicted stress scores to the actual stress scores for the testing dataset. Most of the points fall close to the dashed line, showing that the model generally predicts stress well. However, there is still some spread around the line, meaning the predictions are not exact for every observation.
+The graph above compares the predicted stress scores to the actual stress scores for the testing dataset. Most of the points fall close to the dashed line, showing that the predicted values generally followed the observed stress scores. However, there is still some spread around the line, meaning the predictions are not exact for every observation.
 
 
 ```{r}
