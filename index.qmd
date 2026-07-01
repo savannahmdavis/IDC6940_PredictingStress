@@ -114,6 +114,37 @@ The raw dataset contains over 55k records for 300 distinct users, with over 30 v
 #### Descriptive Statistics
 
 ```{r}
+# Rename variables to readable labels
+variable_labels <- c(
+  age = "Age",
+  height_cm = "Height (km)",
+  weight_kg = "Weight (kg)",
+  gender = "Gender",
+  bmi = "BMI",
+  resting_hr_bpm = "Resting Heart Rate",
+  avg_hr_day_bpm = "Avg Heart Rate",
+  hrv_rmssd_ms = "HRV (RMSSD)",
+  spo2_avg_pct = "Average SpO₂ (%)",
+  sbp_mmHg = "Systolic Blood Pressure",
+  dbp_mmHg = "Diastolic Blood Pressure",
+  steps = "Steps",
+  distance_km = "Distance (km)",
+  calories_kcal = "Calories",
+  workout_minutes = "Workout Duration (min)",
+  caffeine_mg = "Caffeine Intake (mg)",
+  alcohol_units = "Alcohol Units",
+  screen_time_min = "Screen Time (min)",
+  mindfulness_minutes = "Mindfulness (min)",
+  sleep_duration_hours = "Sleep Duration (hours)",
+  sleep_efficiency = "Sleep Efficiency (%)",
+  sleep_latency_min = "Sleep Latency (min)",
+  wake_after_sleep_onset_min = "Wake After Sleep Onset (min)",
+  sleep_stage_rem_pct = "REM Sleep (%)",
+  sleep_stage_deep_pct = "Deep Sleep (%)",
+  sleep_stage_light_pct = "Light Sleep (%)",
+  stress_score = "Stress Score"
+)
+
 # Function to create descriptive statistics tables
 
 create_descriptive_table <- function(data, variables, caption) {
@@ -133,6 +164,13 @@ create_descriptive_table <- function(data, variables, caption) {
       Median = round(median(Value, na.rm = TRUE), 2),
       Max = round(max(Value, na.rm = TRUE), 2),
       .groups = "drop"
+    ) %>%
+        mutate(
+      Variable = ifelse(
+        Variable %in% names(variable_labels),
+        variable_labels[Variable],
+        Variable
+      )
     ) %>%
     kable(caption = caption) %>%
     kable_styling(
@@ -253,6 +291,11 @@ missing_values <- df %>%
   ) %>%
   arrange(desc(Missing_Values)) %>%
   mutate(
+    Variable = ifelse(
+      Variable %in% names(variable_labels),
+      variable_labels[Variable],
+      Variable
+    ),
     Missing_Values = scales::comma(Missing_Values)
   )
 
@@ -294,81 +337,6 @@ missing_summary %>%
 
 It is revealed that less than 2% of the dataset contains missing values across categories such as the physiological, behavioral, and sleep characteristic fields. Because only 1.91% of observations contained missing values, complete-case analysis was considered appropriate and unlikely to meaningfully affect the results.
 
-#### Categorical Fields
-
-```{r}
-# Function to graph frequencies of categorical data
-
-plot_categorical <- function(data, column) {
-
-  plot_data <- data %>%
-    count({{ column }}) %>%
-    mutate(
-      percent = round(100 * n / sum(n), 1),
-      label = paste0(
-        scales::comma(n),
-        "\n(",
-        percent,
-        "%)"
-      )
-    )
-
-  ggplot(
-    plot_data,
-    aes(
-      x = reorder(as.character({{ column }}), -n),
-      y = n
-    )
-  ) +
-    geom_col() +
-    geom_text(
-      aes(label = label),
-      vjust = -0.3,
-      size = 3.5
-    ) +
-    scale_y_continuous(
-      expand = expansion(mult = c(0, 0.15))
-    ) +
-    labs(
-      title = paste(
-        "Frequency of",
-        tools::toTitleCase(
-          gsub("_", " ", deparse(substitute(column)))
-        )
-      ),
-      x = NULL,
-      y = "Count"
-    ) +
-    theme_minimal() +
-    theme(
-      plot.title = element_text(
-        face = "bold",
-        hjust = 0.5
-      ),
-      axis.text.x = element_text(
-        angle = 30,
-        hjust = 1
-      )
-    )
-}
-```
-
-The categorical fields are explored to determine the frequencies in each category.
-
-```{r}
-# Apply graphing function
-
-plot_categorical(df, mood)
-
-plot_categorical(df, gender)
-
-plot_categorical(df, region)
-
-plot_categorical(df, workout_type)
-
-plot_categorical(df, device_model)
-```
-
 #### Stress Distribution
 
 Before building the model, the distribution of the outcome variable is examined. Looking at the distribution of stress scores provides a better understanding of the data and helps identify any obvious issues such as extreme skewness or outliers.
@@ -387,6 +355,7 @@ ggplot(df, aes(x = stress_score)) +
   theme_minimal()
 ```
 
+The distribution appears to be approximately normally distributed with no extreme outliers.
 
 ### Modeling
 
@@ -435,8 +404,16 @@ Before building the model, the continuous variables are checked for correlation.
 ```{r}
 # Calculate correlation matrix for continuous variables
 # Helps identify correlated variables before building model
+continuous_vars_plot <- continuous_vars
+colnames(continuous_vars_plot) <- ifelse(
+  colnames(continuous_vars_plot) %in% names(variable_labels),
+  variable_labels[colnames(continuous_vars_plot)],
+  colnames(continuous_vars_plot)
+)
+
+# Correlation matrix
 corr_matrix <- cor(
-  continuous_vars,
+  continuous_vars_plot,
   use = "complete.obs"
 )
 
@@ -519,7 +496,7 @@ lmm_full <- lmer(
   data = df_clean
 )
 
-summary(lmm_full)
+#summary(lmm_full)
 ```
 
 Several physiological and behavioral variables were statistically significant, including HRV, distance traveled, caffeine intake, alcohol consumption, screen time, mindfulness minutes, sleep duration, sleep efficiency, and wake after sleep onset. On the other hand, age, gender, region, device model, BMI, resting heart rate, blood pressure, oxygen saturation, workout duration, and sleep latency were not significant predictors of stress.
@@ -545,8 +522,9 @@ lmm_final <- lmer(
   data = df_clean
 )
 
-summary(lmm_final)
+#summary(lmm_final)
 ```
+
 The reduced model focused on the wearable health variables that appeared to have the strongest relationship with stress. After removing demographic and device-related variables, the remaining predictors produced nearly identical coefficient estimates and significance levels compared to the previous model. This suggests that those removed variables were contributing very little to explaining differences in stress scores.
 
 The results show that HRV, distance traveled, caffeine intake, alcohol consumption, screen time, mindfulness minutes, sleep duration, sleep efficiency, and wake after sleep onset remained important predictors of stress. Most workout categories were not statistically significant on their own, although running and walking continued to show borderline significance. Workout type was retained because it represents an important behavioral variable collected by wearable devices and improves the overall interpretation of the model.
@@ -589,20 +567,21 @@ test_data <- df_clean %>%
   filter(!user_id %in% train_users)
 
 # Verify the number of unique users in each partition
-length(unique(train_data$user_id))
-length(unique(test_data$user_id))
+# length(unique(train_data$user_id))
+# length(unique(test_data$user_id))
 
 # Verify the number of observations in each partition
-nrow(train_data)
-nrow(test_data)
+# nrow(train_data)
+# nrow(test_data)
 
 # Verify that no users appear in both the training and testing datasets
-length(
-  intersect(
-    unique(train_data$user_id),
-    unique(test_data$user_id)
-  )
-)
+
+# length(
+#   intersect(
+#     unique(train_data$user_id),
+#     unique(test_data$user_id)
+#   )
+# )
 ```
 The number of users, number of observations, and overlap check confirmed that the split was completed correctly and that no users appeared in both datasets.
 
@@ -685,7 +664,6 @@ The graph above compares the predicted stress scores to the actual stress scores
 
 ```{r}
 # This table summarizes the statistical significance of each predictor retained in the final model
-
 coef_table <- broom.mixed::tidy(lmm_final)
 
 coef_table %>%
@@ -698,6 +676,16 @@ coef_table %>%
     p.value
   ) %>%
   mutate(
+    term = case_when(
+      term == "(Intercept)" ~ "Intercept",
+      grepl("^workout_type", term) ~
+        paste0("Workout Type: ", sub("^workout_type", "", term)),
+      TRUE ~ ifelse(
+        term %in% names(variable_labels),
+        variable_labels[term],
+        term
+      )
+    ),
     across(
       c(estimate, std.error, statistic),
       ~ round(.x, 3)
@@ -709,6 +697,13 @@ coef_table %>%
     )
   ) %>%
   kable(
+    col.names = c(
+      "Variable",
+      "Estimate",
+      "Std. Error",
+      "t Statistic",
+      "p-value"
+    ),
     caption = "Fixed Effects from Final Linear Mixed Model"
   ) %>%
   kable_styling(
@@ -716,7 +711,8 @@ coef_table %>%
       "striped",
       "hover",
       "condensed"
-    )
+    ),
+    full_width = FALSE
   )
 ```
 
