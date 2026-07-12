@@ -17,5 +17,6 @@ Which physiological and behavioral health metrics are significant predictors of 
 In Progress
 
 Current Phase:
-- Data exploration and model development
-- Beginning to draft Methods section
+- Finishing Methods section
+- Polishing the rest of the paper
+- Drafting the slides
