@@ -40,30 +40,34 @@ Slides: [slides.html](slides.html){target="_blank"}
 
 ## Methods
 
--   Detail the models or algorithms used.
-
--   Justify your choices based on the problem and data.
-
-*The common non-parametric regression model is*
-$Y_i = m(X_i) + \varepsilon_i$*, where* $Y_i$ *can be defined as the sum
-of the regression function value* $m(x)$ *for* $X_i$*. Here* $m(x)$ *is
-unknown and* $\varepsilon_i$ *some errors. With the help of this
-definition, we can create the estimation for local averaging i.e.*
-$m(x)$ *can be estimated with the product of* $Y_i$ *average and* $X_i$
-*is near to* $x$*. In other words, this means that we are discovering
-the line through the data points with the help of surrounding data
-points. The estimation formula is printed below:*
+A basic linear mixed model can be written as:
 
 $$
-M_n(x) = \sum_{i=1}^{n} W_n (X_i) Y_i  \tag{1}
-$$$W_n(x)$ *is the sum of weights that belongs to all real numbers.
-Weights are positive numbers and small if* $X_i$ *is far from* $x$*.*
-
-*Another equation:*
-
+y_{ij}
+=
+\beta_0
++
+\beta_1X_{1ij}
++
+\beta_2X_{2ij}
++
+\cdots
++
+\beta_pX_{pij}
++
+b_{0i}
++
+\varepsilon_{ij}
 $$
-y_i = \beta_0 + \beta_1 X_1 +\varepsilon_i
-$$
+where:
+
+- $y_{ij}$ = observed stress score for participant $i$ on day $j$
+- $\beta_0$ = fixed intercept
+- $\beta_k$ = fixed-effect coefficient for predictor $k$
+- $X_{kij}$ = observed value of predictor $k$ for participant $i$ on day $j$
+- $b_{0i}$ = participant-specific random intercept
+- $\varepsilon_{ij}$ = residual error
+
 
 ## Analysis and Results
 
@@ -102,7 +106,7 @@ dataset_overview <- tibble(
 )
 
 dataset_overview %>%
-  kable(caption = "Dataset Overview") %>%
+  kable(caption = "Table 1. Dataset Overview") %>%
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed"),
     full_width = FALSE
@@ -198,7 +202,7 @@ create_descriptive_table(
     "weight_kg",
     "bmi"
   ),
-  "Demographic Characteristics"
+  "Table 2. Demographic Characteristics"
 )
 ```
 
@@ -216,7 +220,7 @@ create_descriptive_table(
     "sbp_mmHg",
     "dbp_mmHg"
   ),
-  "Physiological Characteristics"
+  "Table 3. Physiological Characteristics"
 )
 ```
 
@@ -235,7 +239,7 @@ create_descriptive_table(
     "screen_time_min",
     "mindfulness_minutes"
   ),
-  "Behavioral Characteristics"
+  "Table 4. Behavioral Characteristics"
 )
 ```
 
@@ -253,7 +257,7 @@ create_descriptive_table(
     "sleep_stage_deep_pct",
     "sleep_stage_light_pct"
   ),
-  "Sleep Characteristics"
+  "Table 5. Sleep Characteristics"
 )
 ```
 
@@ -265,7 +269,7 @@ create_descriptive_table(
   c(
     "stress_score"
   ),
-  "Stress Score Summary"
+  "Table 6. Stress Score Summary"
 )
 ```
 
@@ -300,7 +304,7 @@ missing_values <- df %>%
   )
 
 missing_values %>%
-  kable(caption = "Missing Values by Variable") %>%
+  kable(caption = "Table 7. Missing Values by Variable") %>%
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed"),
     full_width = FALSE
@@ -327,7 +331,7 @@ missing_summary <- tibble(
 
 missing_summary %>%
   kable(
-    caption = "Impact of Missing Data Removal"
+    caption = "Table 8. Impact of Missing Data Removal"
   ) %>%
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed"),
@@ -335,7 +339,7 @@ missing_summary %>%
   )
 ```
 
-Less than 2% of the observations contained at least one missing value, with missing values occurring across several physiological, behavioral, and sleep-related variables. Because only 1.91% of the observations contained missing data, a complete-case analysis was performed by removing incomplete observations prior to model fitting. This resulted in a relatively small loss of data while simplifying the subsequent analyses.
+Table 8 reveals that less than 2% of the observations contained at least one missing value, with missing values occurring across several physiological, behavioral, and sleep-related variables. Because only 1.91% of the observations contained missing data, a complete-case analysis was performed by removing incomplete observations prior to model fitting. This resulted in a relatively small loss of data while simplifying the subsequent analyses.
 
 #### Stress Distribution
 
@@ -347,7 +351,7 @@ Before building the model, the distribution of the outcome variable is examined.
 ggplot(df, aes(x = stress_score)) +
   geom_histogram(bins = 20) +
   labs(
-    title = "Distribution of Stress Scores",
+    title = "Figure 1. Distribution of Stress Scores",
     subtitle = "Stress scores appear approximately normally distributed",
     x = "Stress Score",
     y = "Count"
@@ -355,7 +359,7 @@ ggplot(df, aes(x = stress_score)) +
   theme_minimal()
 ```
 
-The distribution appears to be approximately normally distributed with no extreme outliers.
+Figure 1 shows that the distribution appears to be approximately normally distributed with no extreme outliers.
 
 ### Modeling and Results
 
@@ -423,7 +427,9 @@ corrplot(
   corr_matrix,
   method = "color",
   type = "upper",
-  tl.cex = 0.7
+  tl.cex = 0.7,
+  title = "Figure 2. Correlation Heatmap of Continuous Predictor Variables",
+  mar = c(0, 0, 2, 0)
 )
 ```
 
@@ -456,7 +462,7 @@ corr_table %>%
     Correlation
   ) %>%
   kable(
-    caption = "Strong correlations among predictor variables"
+    caption = "Table 9. Strong correlations among predictor variables"
   ) %>%
   kable_styling(full_width = FALSE)
 ```
@@ -574,7 +580,7 @@ coef_table %>%
       "t Statistic",
       "p-value"
     ),
-    caption = "Fixed Effects from Final Linear Mixed Model"
+    caption = "Table 10. Fixed Effects from Final Linear Mixed Model"
   ) %>%
   kable_styling(
     bootstrap_options = c(
@@ -586,11 +592,11 @@ coef_table %>%
   )
 ```
 
-The above table summarizes the fixed effects from the final linear mixed model. The estimates show the average relationship between each predictor and stress score after accounting for the repeated measurements collected from each participant.
+Table 10 summarizes the fixed effects from the final linear mixed model. The estimates show the average relationship between each predictor and stress score after accounting for the repeated measurements collected from each participant.
 
 Several physiological and behavioral variables were significant predictors of stress. Higher heart rate variability (HRV), greater distance traveled, more mindfulness minutes, longer sleep duration, and higher sleep efficiency were all associated with lower stress scores. In contrast, greater caffeine intake, alcohol consumption, and screen time were associated with higher stress scores. These findings suggest that healthier sleep patterns, higher HRV, regular physical activity, and mindfulness are associated with lower levels of stress, while greater caffeine consumption, alcohol use, and screen time are associated with higher stress levels.
 
-Workout type was not a statistically significant predictor of stress after accounting for the other variables in the model. Although participants who reported running tended to have slightly lower stress scores than the reference group, the effect was small and only marginally significant. Overall, the results suggest that the physiological and behavioral measures captured by wearable devices were more informative predictors of stress than the type of workout performed.
+None of the workout type indicator variables were statistically significant after accounting for the remaining predictors. Although participants who reported running tended to have slightly lower stress scores than the reference group, the estimated effect was small and only marginally significant. Overall, the physiological, behavioral, and sleep-related variables included in the model appeared to have a stronger relationship with stress score than the reported workout type.
 
 
 The final fitted model is:
@@ -623,15 +629,28 @@ $$
 $$
 Here, $i$ indexes participants, $j$ indexes daily observations, and $b_{0i}$ represents the participant-specific random intercept.
 
+##### Figure 3. Normality of Residuals
 
 ```{r}
 # Check model diagnostics
 check_model(lmm_final, check = "qq")
+```
+
+##### Figure 4. Homogeneity of Variance
+
+```{r}
+# Check model diagnostics
 check_model(lmm_final, check = "homogeneity")
+```
+
+##### Figure 5. Linearity
+
+```{r}
+# Check model diagnostics
 check_model(lmm_final, check = "linearity")
 ```
 
-The assumptions of the final linear mixed model were checked. The Q-Q plot shows that the residuals are approximately normally distributed, with only small departures from normality at the extreme ends of the distribution. The homogeneity of variance plot shows a fairly consistent spread of the residuals across the fitted values, with no strong evidence of increasing or decreasing variance. The residuals versus fitted values plot also does not show any obvious patterns, indicating that the relationship between the predictors and stress score is reasonably linear. Overall, these diagnostic plots suggest that the assumptions of the linear mixed model were reasonably satisfied.
+The assumptions of the final linear mixed model were checked. Figure 3 above shows that the residuals are approximately normally distributed, with only small departures from normality at the extreme ends of the distribution. In Figure 4, the homogeneity of variance plot shows a fairly consistent spread of the residuals across the fitted values, with no strong evidence of increasing or decreasing variance. In Figure 5, the residuals versus fitted values plot also does not show any obvious patterns, indicating that the relationship between the predictors and stress score is approximately linear. Overall, these diagnostic plots suggest that the assumptions of the linear mixed model were reasonably satisfied.
 
 ```{r}
 # Calculate model performance metrics
@@ -671,7 +690,7 @@ performance_table <- tibble(
 
 performance_table %>%
   kable(
-    caption = "Final Model Performance Metrics"
+    caption = "Table 11. Final Model Performance Metrics"
   ) %>%
   kable_styling(
     bootstrap_options = c(
@@ -683,9 +702,11 @@ performance_table %>%
   )
 ```
 
-The table above summarizes the overall performance of the final linear mixed model. The marginal $R^2$ of 0.726 indicates that the fixed effects explained approximately 72.6% of the variation in stress scores. The conditional $R^2$ was nearly identical (0.729), indicating that the participant-specific random intercept contributed relatively little additional explained variation beyond the fixed effects. Similarly, the ICC of 0.013 suggests that only a small proportion of the total variability in stress scores was attributable to stable differences between participants.
+Table 11 above summarizes the overall performance of the final linear mixed model. The marginal $R^2$ of 0.726 indicates that the fixed effects explained approximately 72.6% of the variation in stress scores. The conditional $R^2$ was nearly identical (0.729), indicating that the participant-specific random intercept contributed relatively little additional explained variation beyond the fixed effects. Similarly, the ICC of 0.013 suggests that only a small proportion of the total variability in stress scores was attributable to stable differences between participants.
 
-The RMSE of 6.128 indicates a typical prediction error of approximately six stress-score points, with larger prediction errors receiving greater weight. The MAE of 4.882 indicates that the fitted stress scores differed from the observed values by an average of approximately five points.
+The RMSE of 6.072 indicates a typical residual error of approximately six stress-score points, with larger prediction errors receiving greater weight. The MAE of 4.884 indicates that the fitted stress scores differed from the observed values by an average of approximately five points. 
+
+Collectively, these performance metrics indicate that the final model explained a substantial proportion of the variation in stress scores while maintaining relatively small residual errors across the observed data.
 
 ```{r}
 # Observed versus fitted values
@@ -710,19 +731,19 @@ ggplot(
     linetype = "dashed"
   ) +
   labs(
-    title = "Observed versus Fitted Stress Scores",
+    title = "Figure 6. Observed versus Fitted Stress Scores",
     x = "Observed Stress Score",
     y = "Fitted Stress Score"
   ) +
   theme_minimal()
 ```
 
-The figure above compares the observed stress scores with the fitted values produced by the final linear mixed model. Most observations fall relatively close to the reference line, indicating that the fitted values generally correspond well with the observed stress scores. Although some variability remains, the overall pattern suggests that the model provides a good representation of the observed data.
+Figure 6 above compares the observed stress scores with the fitted values produced by the final linear mixed model. Most observations fall relatively close to the reference line, indicating that the fitted values generally correspond well with the observed stress scores. Although some variability remains, the overall pattern suggests that the model provides a good representation of the observed data.
 
 
 ### Conclusion
 
-Overall, the final linear mixed model identified several physiological, behavioral, and sleep-related variables that were associated with stress within this synthetic wearable health dataset. In particular, measures related to heart rate variability, physical activity, sleep quality, mindfulness, caffeine intake, alcohol consumption, and screen time demonstrated meaningful relationships with stress after accounting for repeated measurements within participants. The final model satisfied the evaluated assumptions, explained a substantial proportion of the variation in stress scores, and provided a good overall fit to the observed data.
+Overall, the final linear mixed model identified several physiological, behavioral, and sleep-related variables that were associated with stress within this synthetic wearable health dataset. In particular, measures related to heart rate variability, physical activity, sleep quality, mindfulness, caffeine intake, alcohol consumption, and screen time were significantly associated with stress after accounting for repeated measurements within participants. The final model satisfied the evaluated assumptions, explained a substantial proportion of the variation in stress scores, and provided a good overall fit to the observed data.
 
 These findings demonstrate the value of linear mixed models for analyzing longitudinal wearable health data, where repeated observations from the same individuals violate the assumption of independent observations required by traditional linear regression. By incorporating participant-specific random effects, the model was able to account for within-participant correlation while estimating the relationships between wearable health measures and stress.
 
