@@ -32,7 +32,7 @@ Slides: [slides.html](slides.html){target="_blank"}
   While physiological variables such as heart rate and HRV provide valuable information about how the body responds to stress, researchers have found that behavioral and lifestyle factors also contribute to stress levels. Sleep duration, sleep quality, sleep efficiency, screen time, caffeine consumption, alcohol use, and mindfulness practices all have been shown to affect overall well-being [@vidalbustamante2024sleep; @booth2022stress]. Out of those listed factors, sleep has been identified as one of the strongest predictors of perceived stress, as disruptions influence an individual's ability to adapt to daily demands [@bloomfield2024sleep]. So, to increase the accuracy of stress prediction, researchers have concluded that combining physiological signals with lifestyle factors improves the ability to predict individuals experiencing higher levels of stress [@sano2018markers].
 
 
-  Based on previous research, both physiological and behavioral measures appear to contribute to stress. This study builds on that work by examining these relationships using a synthetic longitudinal wearable dataset consisting of 300 users observed over a six-month period, resulting in more than 55,000 observations. The dataset includes physiological and behavioral measures such as heart rate variability (HRV), sleep duration, sleep efficiency, caffeine consumption, alcohol use, screen time, mindfulness, and physical activity, along with daily stress scores.
+  Based on previous research, both physiological and behavioral measures appear to contribute to stress. This study builds on that work by examining these relationships using a synthetic longitudinal wearable dataset consisting of 300 participants observed over a six-month period, resulting in more than 55,000 observations. The dataset includes physiological and behavioral measures such as heart rate variability (HRV), sleep duration, sleep efficiency, caffeine consumption, alcohol use, screen time, mindfulness, and physical activity, along with daily stress scores.
 
 
   The purpose of this study is to identify physiological and behavioral predictors of stress using longitudinal wearable health data and evaluate the ability of a linear mixed model to predict stress scores over time. Because the dataset contains repeated measurements from the same participants, a linear mixed model was selected to account for the correlation among observations collected from the same individual. Linear mixed models are well suited for longitudinal data because they account for repeated observations while capturing both population-level trends and variation between individuals [@silveira2023mixedeffects; @harrison2018mixed].
@@ -75,7 +75,7 @@ where:
 
 ### Data Exploration and Visualization
 
-This report utilizes the *Health + Wellness + Stress/Sleep Tracking* dataset obtained from Kaggle. The dataset contains wearable health measurements and behavioral measurements for 300 simulated individuals over a 6 month period. The dataset contains demographic, physiological, behavioral, and sleep-related variables collected daily from wearable devices. A linear mixed model is appropriate for this dataset because observations from the same participant are not independent, violating a key assumption of ordinary linear regression. [@kaggle_dataset]
+This report utilizes the *Health + Wellness + Stress/Sleep Tracking* dataset obtained from Kaggle. The dataset contains wearable health and behavioral measurements for 300 simulated participants over a 6-month period. The dataset contains demographic, physiological, behavioral, and sleep-related variables collected daily from wearable devices. A linear mixed model is appropriate for this dataset because observations from the same participant are not independent, violating a key assumption of ordinary linear regression. [@kaggle_dataset]
 
 ```{r setup, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -99,7 +99,7 @@ df = read_csv("wearables_health_6mo_daily.csv")
 # Quick overview of dataset
 
 dataset_overview <- tibble(
-  Metric = c("Total Observations", "Total Variables", "Unique Users"),
+  Metric = c("Total Observations", "Total Variables", "Unique Participants"),
   Value = c(
     scales::comma(nrow(df)),
     scales::comma(ncol(df)),
@@ -115,7 +115,7 @@ dataset_overview %>%
   )
 ```
 
-The raw dataset contains over 55,000 records for 300 distinct users, with over 30 variables to select as predictors for stress score.
+The raw dataset contains over 55,000 records for 300 distinct participants, with over 30 variables available for model development.
 
 #### Descriptive Statistics
 
@@ -306,9 +306,19 @@ missing_values <- df %>%
   )
 
 missing_values %>%
-  kable(caption = "Table 7. Missing Values by Variable") %>%
+  rename(
+    `Missing Values` = Missing_Values,
+    `Percent Missing` = Percent_Missing
+  ) %>%
+  kable(
+    caption = "Table 7. Missing Values by Variable"
+  ) %>%
   kable_styling(
-    bootstrap_options = c("striped", "hover", "condensed"),
+    bootstrap_options = c(
+      "striped",
+      "hover",
+      "condensed"
+    ),
     full_width = FALSE
   )
 ```
@@ -326,9 +336,9 @@ pct_rows_removed <- round(
 )
 
 missing_summary <- tibble(
-  Total_Observations = scales::comma(nrow(df)),
-  Rows_With_Missing = scales::comma(rows_with_missing),
-  Percent_Removed = paste0(pct_rows_removed, "%")
+  "Total Observations" = scales::comma(nrow(df)),
+  "Rows With Missing" = scales::comma(rows_with_missing),
+  "Percent Removed" = paste0(pct_rows_removed, "%")
 )
 
 missing_summary %>%
@@ -345,7 +355,7 @@ Table 8 reveals that less than 2% of the observations contained at least one mis
 
 #### Stress Distribution
 
-Before building the model, the distribution of the outcome variable is examined. Looking at the distribution of stress scores provides a better understanding of the data and helps identify any obvious issues such as extreme skewness or outliers.
+Before fitting the linear mixed model, the distribution of the outcome variable is examined. Looking at the distribution of stress scores provides a better understanding of the data and helps identify any obvious issues such as extreme skewness or outliers.
 
 ```{r}
 # Investigating distribution of stress score within the dataset
@@ -405,7 +415,8 @@ continuous_vars <- df_clean %>%
   )
 ```
 
-Before building the model, the continuous variables were checked for correlation. Highly correlated predictors can provide overlapping information, making it difficult to determine the individual effect of each variable. The heatmap provides a quick way to identify variables that may need to be removed before fitting the model.
+
+Before fitting the model, the continuous variables were checked for correlation. Highly correlated predictors can provide overlapping information, making it difficult to determine the individual effect of each variable. The correlation heatmap was used to identify highly correlated predictor variables prior to model fitting.
 
 ```{r}
 # Calculate correlation matrix for continuous variables
@@ -469,10 +480,11 @@ corr_table %>%
   kable_styling(full_width = FALSE)
 ```
 
+
 As expected, steps and distance were highly correlated because both measure daily physical activity. Similarly, BMI and weight were strongly correlated because BMI is calculated directly from weight and height. To reduce redundancy and minimize multicollinearity, only one variable from each highly correlated pair was retained for model development.
 
 
-The full linear mixed model was fit using all remaining variables after removing the highly correlated predictors identified in the correlation analysis. The initial model gives a starting point for determining which variables contribute the most to predicting stress and which variables can be removed to simplify the model.
+The full linear mixed model was fit using all remaining variables after removing the highly correlated predictors identified in the correlation analysis. The initial model serves as a starting point for determining which variables contribute the most to predicting stress and which variables can be removed to simplify the model.
 
 ```{r}
 # Build initial model with all variables (except ones with strong correlations)
@@ -508,6 +520,7 @@ lmm_full <- lmer(
 #summary(lmm_full)
 ```
 
+
 The initial model identified several physiological, behavioral, and sleep-related variables that demonstrated statistically significant associations with stress score. In contrast, demographic characteristics, device-related variables, resting heart rate, blood pressure, oxygen saturation, workout duration, and sleep latency did not demonstrate statistically significant relationships after accounting for the remaining predictors.
 
 
@@ -533,6 +546,7 @@ lmm_final <- lmer(
 
 #summary(lmm_final)
 ```
+
 
 Variables that demonstrated limited contribution to the interpretation of the initial model were removed to simplify the model while retaining the primary wearable health measures of interest. The final model included workout type, HRV, distance traveled, caffeine intake, alcohol consumption, screen time, mindfulness minutes, sleep duration, sleep efficiency, and wake after sleep onset.
 
@@ -594,14 +608,16 @@ coef_table %>%
   )
 ```
 
+
 Table 10 summarizes the fixed effects from the final linear mixed model. The coefficients describe the estimated relationship between each predictor and stress score after accounting for the repeated measurements collected from each participant.
 
-Several physiological and behavioral variables were significant predictors of stress. Higher HRV, greater distance traveled, more mindfulness minutes, longer sleep duration, and higher sleep efficiency were all associated with lower stress scores. In contrast, greater caffeine intake, alcohol consumption, and screen time were associated with higher stress scores. These findings suggest that healthier sleep patterns, higher HRV, regular physical activity, and mindfulness are associated with lower levels of stress, while greater caffeine consumption, alcohol use, and screen time are associated with higher stress levels.
+Several physiological and behavioral variables were significant predictors of stress. Higher HRV, greater distance traveled, more mindfulness minutes, longer sleep duration, and higher sleep efficiency were all associated with lower stress scores. In contrast, greater caffeine intake, alcohol consumption, screen time, and waking after sleep onset were associated with higher stress scores. These findings suggest that longer sleep duration, higher sleep efficiency, higher HRV, greater distance traveled, and mindfulness are associated with lower levels of stress, while greater caffeine consumption, alcohol use, screen time, and waking after sleep onset are associated with higher stress levels.
 
 None of the workout type indicator variables were statistically significant after accounting for the remaining predictors. Although participants who reported running tended to have slightly lower stress scores than the reference group, the estimated effect was small and only marginally significant. Overall, the physiological, behavioral, and sleep-related variables included in the model appeared to have a stronger relationship with stress score than the reported workout type.
 
 
-The final fitted model is:
+
+The final fitted model can be written as:
 
 $$
 \begin{aligned}
@@ -629,7 +645,7 @@ $$
 +b_{0i}.
 \end{aligned}
 $$
-Here, $i$ indexes participants, $j$ indexes daily observations, and $b_{0i}$ represents the participant-specific random intercept.
+where $i$ indexes participants, $j$ indexes daily observations, and $b_{0i}$ represents the participant-specific random intercept.
 
 ##### Figure 3. Normality of Residuals
 
@@ -652,7 +668,8 @@ check_model(lmm_final, check = "homogeneity")
 check_model(lmm_final, check = "linearity")
 ```
 
-The assumptions of the final linear mixed model were checked. Figure 3 above shows that the residuals are approximately normally distributed, with only small departures from normality at the extreme ends of the distribution. In Figure 4, the homogeneity of variance plot shows a fairly consistent spread of the residuals across the fitted values, with no strong evidence of increasing or decreasing variance. In Figure 5, the residuals versus fitted values plot also does not show any obvious patterns, indicating that the relationship between the predictors and stress score is approximately linear. Overall, these diagnostic plots suggest that the assumptions of the linear mixed model were reasonably satisfied.
+
+The assumptions of the final linear mixed model were checked. Figure 3 above shows that the residuals are approximately normally distributed, with only small departures from normality at the extreme ends of the distribution. In Figure 4, the homogeneity of variance plot shows a fairly consistent spread of the residuals across the fitted values, with no strong evidence of increasing or decreasing variance. In Figure 5, the residuals versus fitted values plot also does not show any obvious patterns, indicating that the relationship between the predictors and stress score is approximately linear. Overall, these diagnostic plots suggest that the assumptions of the linear mixed model were generally satisfied.
 
 ```{r}
 # Calculate model performance metrics
@@ -676,7 +693,7 @@ performance_table <- tibble(
     "ICC",
     "RMSE",
     "MAE",
-    "Users",
+    "Participants",
     "Observations"
   ),
   Value = c(
@@ -704,11 +721,12 @@ performance_table %>%
   )
 ```
 
+
 Table 11 summarizes the overall performance of the final linear mixed model. The marginal $R^2$ of 0.726 indicates that the fixed effects explained approximately 72.6% of the variation in stress scores. The conditional $R^2$ was slightly higher (0.729), indicating that the participant-specific random intercept provided a modest additional contribution beyond the fixed effects. Likewise, the ICC of 0.013 suggests that relatively little of the remaining variation in stress scores was attributable to stable differences between participants.
 
 Although the between-participant variability was relatively small, the linear mixed model remained appropriate because the dataset contained repeated daily observations from the same individuals. Including a participant-specific random intercept accounted for the correlation among observations collected from the same participant while allowing the fixed effects to estimate the relationships between the wearable health measures and stress.
 
-The RMSE of 6.072 indicates a typical residual error of approximately six stress-score points, with larger prediction errors receiving greater weight. The MAE of 4.884 indicates that the fitted stress scores differed from the observed values by an average of approximately five points. 
+The RMSE of 6.072 indicates a typical residual error of approximately six stress-score points, with larger prediction errors receiving greater weight. The MAE of 4.844 indicates that the fitted stress scores differed from the observed values by an average of approximately five points. 
 
 Collectively, these performance metrics indicate that the final model explained a substantial proportion of the variation in stress scores while maintaining relatively small residual errors across the observed data.
 
@@ -741,6 +759,7 @@ ggplot(
   ) +
   theme_minimal()
 ```
+
 
 Figure 6 above compares the observed stress scores with the fitted values produced by the final linear mixed model. Most observations fall relatively close to the reference line, indicating that the fitted values generally correspond well with the observed stress scores. Although some variability remains, the overall pattern suggests that the model provides a good representation of the observed data.
 

@@ -2627,7 +2627,7 @@ window.Quarto = {
 <p>Stress is a state where the emotional, psychological, or physiological systems of an individual experience a demand that exceeds their knowledge and ability to resolve. Whether perceived consciously or unconsciously, the body then responds by prompting organs and glands to produce hormones that will assist the individual in adapting to the situation. Normal physiological responses to acute stress are short-lived and allow the body to return to its natural state without any long-term consequences. However, chronic stress, which is the result of unresolved long-standing demands and challenges can result in physical complications and disease in the body <span class="citation" data-cites="can2022survey">(<a href="#ref-can2022survey" role="doc-biblioref">Can et al. 2022</a>)</span>. In fact, the effects of chronic stress are so serious that research in Europe showed stress as the second most severe work-related health issue <span class="citation" data-cites="can2022survey">(<a href="#ref-can2022survey" role="doc-biblioref">Can et al. 2022</a>)</span>. Insights on stress can of course be self-reported by individuals, however, more efficient and accurate means of tracking stress can be accomplished via wearable devices such as Fitbit and Garmin.</p>
 <p>Wearable devices can collect a wide range of data such as: heart rate, heart rate variability (HRV), sleep quality, physical activity, and movement patterns <span class="citation" data-cites="namvari2022ppg wang2024heart">(<a href="#ref-namvari2022ppg" role="doc-biblioref">Namvari et al. 2022</a>; <a href="#ref-wang2024heart" role="doc-biblioref">Wang et al. 2024</a>)</span>. Out of those variables, researchers select the physiological ones that are directly influenced by the autonomic nervous system (ANS), mainly because stress is fundamentally an ANS response. The ANS regulates involuntary bodily functions and also consists of the sympathetic (SNS) and parasympathetic nervous systems (PNS) which maintain homeostasis within the body <span class="citation" data-cites="chalmers2022sleep">(<a href="#ref-chalmers2022sleep" role="doc-biblioref">Chalmers et al. 2022</a>)</span>. During periods of stress, the SNS activates which results in elevated heart rates and changes in HRV, which makes those important variables to include in stress prediction research. Additionally, sleep, physical activity, circadian rhythms, and environmental conditions also contribute to stress and researchers often incorporate them when developing stress prediction models <span class="citation" data-cites="wang2024heart">(<a href="#ref-wang2024heart" role="doc-biblioref">Wang et al. 2024</a>)</span>.</p>
 <p>While physiological variables such as heart rate and HRV provide valuable information about how the body responds to stress, researchers have found that behavioral and lifestyle factors also contribute to stress levels. Sleep duration, sleep quality, sleep efficiency, screen time, caffeine consumption, alcohol use, and mindfulness practices all have been shown to affect overall well-being <span class="citation" data-cites="vidalbustamante2024sleep booth2022stress">(<a href="#ref-vidalbustamante2024sleep" role="doc-biblioref">Vidal Bustamante et al. 2024</a>; <a href="#ref-booth2022stress" role="doc-biblioref">Booth et al. 2022</a>)</span>. Out of those listed factors, sleep has been identified as one of the strongest predictors of perceived stress, as disruptions influence an individual’s ability to adapt to daily demands <span class="citation" data-cites="bloomfield2024sleep">(<a href="#ref-bloomfield2024sleep" role="doc-biblioref">Bloomfield 2024</a>)</span>. So, to increase the accuracy of stress prediction, researchers have concluded that combining physiological signals with lifestyle factors improves the ability to predict individuals experiencing higher levels of stress <span class="citation" data-cites="sano2018markers">(<a href="#ref-sano2018markers" role="doc-biblioref">Sano et al. 2018</a>)</span>.</p>
-<p>Based on previous research, both physiological and behavioral measures appear to contribute to stress. This study builds on that work by examining these relationships using a synthetic longitudinal wearable dataset consisting of 300 users observed over a six-month period, resulting in more than 55,000 observations. The dataset includes physiological and behavioral measures such as heart rate variability (HRV), sleep duration, sleep efficiency, caffeine consumption, alcohol use, screen time, mindfulness, and physical activity, along with daily stress scores.</p>
+<p>Based on previous research, both physiological and behavioral measures appear to contribute to stress. This study builds on that work by examining these relationships using a synthetic longitudinal wearable dataset consisting of 300 participants observed over a six-month period, resulting in more than 55,000 observations. The dataset includes physiological and behavioral measures such as heart rate variability (HRV), sleep duration, sleep efficiency, caffeine consumption, alcohol use, screen time, mindfulness, and physical activity, along with daily stress scores.</p>
 <p>The purpose of this study is to identify physiological and behavioral predictors of stress using longitudinal wearable health data and evaluate the ability of a linear mixed model to predict stress scores over time. Because the dataset contains repeated measurements from the same participants, a linear mixed model was selected to account for the correlation among observations collected from the same individual. Linear mixed models are well suited for longitudinal data because they account for repeated observations while capturing both population-level trends and variation between individuals <span class="citation" data-cites="silveira2023mixedeffects harrison2018mixed">(<a href="#ref-silveira2023mixedeffects" role="doc-biblioref">Silveira et al. 2023</a>; <a href="#ref-harrison2018mixed" role="doc-biblioref">Harrison et al. 2018</a>)</span>.</p>
 </section>
 <section id="methods" class="level2">
@@ -2664,7 +2664,7 @@ b_{0i}
 <h2 class="anchored" data-anchor-id="analysis-and-results">Analysis and Results</h2>
 <section id="data-exploration-and-visualization" class="level3">
 <h3 class="anchored" data-anchor-id="data-exploration-and-visualization">Data Exploration and Visualization</h3>
-<p>This report utilizes the <em>Health + Wellness + Stress/Sleep Tracking</em> dataset obtained from Kaggle. The dataset contains wearable health measurements and behavioral measurements for 300 simulated individuals over a 6 month period. The dataset contains demographic, physiological, behavioral, and sleep-related variables collected daily from wearable devices. A linear mixed model is appropriate for this dataset because observations from the same participant are not independent, violating a key assumption of ordinary linear regression. <span class="citation" data-cites="kaggle_dataset">(<a href="#ref-kaggle_dataset" role="doc-biblioref">Akarsu 2025</a>)</span></p>
+<p>This report utilizes the <em>Health + Wellness + Stress/Sleep Tracking</em> dataset obtained from Kaggle. The dataset contains wearable health and behavioral measurements for 300 simulated participants over a 6-month period. The dataset contains demographic, physiological, behavioral, and sleep-related variables collected daily from wearable devices. A linear mixed model is appropriate for this dataset because observations from the same participant are not independent, violating a key assumption of ordinary linear regression. <span class="citation" data-cites="kaggle_dataset">(<a href="#ref-kaggle_dataset" role="doc-biblioref">Akarsu 2025</a>)</span></p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -2693,7 +2693,7 @@ b_{0i}
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick overview of dataset</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>dataset_overview <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Metric =</span> <span class="fu">c</span>(<span class="st">&quot;Total Observations&quot;</span>, <span class="st">&quot;Total Variables&quot;</span>, <span class="st">&quot;Unique Users&quot;</span>),</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Metric =</span> <span class="fu">c</span>(<span class="st">&quot;Total Observations&quot;</span>, <span class="st">&quot;Total Variables&quot;</span>, <span class="st">&quot;Unique Participants&quot;</span>),</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Value =</span> <span class="fu">c</span>(</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    scales<span class="sc">::</span><span class="fu">comma</span>(<span class="fu">nrow</span>(df)),</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    scales<span class="sc">::</span><span class="fu">comma</span>(<span class="fu">ncol</span>(df)),</span>
@@ -2727,14 +2727,14 @@ b_{0i}
 <td style="text-align: left;">33</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Unique Users</td>
+<td style="text-align: left;">Unique Participants</td>
 <td style="text-align: left;">300</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>The raw dataset contains over 55,000 records for 300 distinct users, with over 30 variables to select as predictors for stress score.</p>
+<p>The raw dataset contains over 55,000 records for 300 distinct participants, with over 30 variables available for model development.</p>
 <section id="descriptive-statistics" class="level4">
 <h4 class="anchored" data-anchor-id="descriptive-statistics">Descriptive Statistics</h4>
 <div class="cell">
@@ -3228,11 +3228,21 @@ b_{0i}
 <span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>missing_values <span class="sc">%&gt;%</span></span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">caption =</span> <span class="st">&quot;Table 7. Missing Values by Variable&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">&quot;striped&quot;</span>, <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>),</span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Missing Values</span><span class="st">`</span> <span class="ot">=</span> Missing_Values,</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Percent Missing</span><span class="st">`</span> <span class="ot">=</span> Percent_Missing</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">&quot;Table 7. Missing Values by Variable&quot;</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;striped&quot;</span>,</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;hover&quot;</span>,</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;condensed&quot;</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <table class="table table-striped table-hover table-condensed caption-top table-sm small">
@@ -3240,8 +3250,8 @@ b_{0i}
 <thead>
 <tr class="header">
 <th style="text-align: left;" data-quarto-table-cell-role="th">Variable</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Missing_Values</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Percent_Missing</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Missing Values</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Percent Missing</th>
 </tr>
 </thead>
 <tbody>
@@ -3324,9 +3334,9 @@ b_{0i}
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>missing_summary <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">Total_Observations =</span> scales<span class="sc">::</span><span class="fu">comma</span>(<span class="fu">nrow</span>(df)),</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">Rows_With_Missing =</span> scales<span class="sc">::</span><span class="fu">comma</span>(rows_with_missing),</span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">Percent_Removed =</span> <span class="fu">paste0</span>(pct_rows_removed, <span class="st">&quot;%&quot;</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Total Observations&quot;</span> <span class="ot">=</span> scales<span class="sc">::</span><span class="fu">comma</span>(<span class="fu">nrow</span>(df)),</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Rows With Missing&quot;</span> <span class="ot">=</span> scales<span class="sc">::</span><span class="fu">comma</span>(rows_with_missing),</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Percent Removed&quot;</span> <span class="ot">=</span> <span class="fu">paste0</span>(pct_rows_removed, <span class="st">&quot;%&quot;</span>)</span>
 <span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>missing_summary <span class="sc">%&gt;%</span></span>
@@ -3343,9 +3353,9 @@ b_{0i}
 <caption>Table 8. Impact of Missing Data Removal</caption>
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">Total_Observations</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Rows_With_Missing</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Percent_Removed</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Total Observations</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Rows With Missing</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Percent Removed</th>
 </tr>
 </thead>
 <tbody>
@@ -3362,7 +3372,7 @@ b_{0i}
 </section>
 <section id="stress-distribution" class="level4">
 <h4 class="anchored" data-anchor-id="stress-distribution">Stress Distribution</h4>
-<p>Before building the model, the distribution of the outcome variable is examined. Looking at the distribution of stress scores provides a better understanding of the data and helps identify any obvious issues such as extreme skewness or outliers.</p>
+<p>Before fitting the linear mixed model, the distribution of the outcome variable is examined. Looking at the distribution of stress scores provides a better understanding of the data and helps identify any obvious issues such as extreme skewness or outliers.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -3432,7 +3442,7 @@ b_{0i}
 <span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p>Before building the model, the continuous variables were checked for correlation. Highly correlated predictors can provide overlapping information, making it difficult to determine the individual effect of each variable. The heatmap provides a quick way to identify variables that may need to be removed before fitting the model.</p>
+<p>Before fitting the model, the continuous variables were checked for correlation. Highly correlated predictors can provide overlapping information, making it difficult to determine the individual effect of each variable. The correlation heatmap was used to identify highly correlated predictor variables prior to model fitting.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -3560,7 +3570,7 @@ b_{0i}
 </div>
 </div>
 <p>As expected, steps and distance were highly correlated because both measure daily physical activity. Similarly, BMI and weight were strongly correlated because BMI is calculated directly from weight and height. To reduce redundancy and minimize multicollinearity, only one variable from each highly correlated pair was retained for model development.</p>
-<p>The full linear mixed model was fit using all remaining variables after removing the highly correlated predictors identified in the correlation analysis. The initial model gives a starting point for determining which variables contribute the most to predicting stress and which variables can be removed to simplify the model.</p>
+<p>The full linear mixed model was fit using all remaining variables after removing the highly correlated predictors identified in the correlation analysis. The initial model serves as a starting point for determining which variables contribute the most to predicting stress and which variables can be removed to simplify the model.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -3811,9 +3821,9 @@ b_{0i}
 </div>
 </div>
 <p>Table 10 summarizes the fixed effects from the final linear mixed model. The coefficients describe the estimated relationship between each predictor and stress score after accounting for the repeated measurements collected from each participant.</p>
-<p>Several physiological and behavioral variables were significant predictors of stress. Higher HRV, greater distance traveled, more mindfulness minutes, longer sleep duration, and higher sleep efficiency were all associated with lower stress scores. In contrast, greater caffeine intake, alcohol consumption, and screen time were associated with higher stress scores. These findings suggest that healthier sleep patterns, higher HRV, regular physical activity, and mindfulness are associated with lower levels of stress, while greater caffeine consumption, alcohol use, and screen time are associated with higher stress levels.</p>
+<p>Several physiological and behavioral variables were significant predictors of stress. Higher HRV, greater distance traveled, more mindfulness minutes, longer sleep duration, and higher sleep efficiency were all associated with lower stress scores. In contrast, greater caffeine intake, alcohol consumption, screen time, and waking after sleep onset were associated with higher stress scores. These findings suggest that longer sleep duration, higher sleep efficiency, higher HRV, greater distance traveled, and mindfulness are associated with lower levels of stress, while greater caffeine consumption, alcohol use, screen time, and waking after sleep onset are associated with higher stress levels.</p>
 <p>None of the workout type indicator variables were statistically significant after accounting for the remaining predictors. Although participants who reported running tended to have slightly lower stress scores than the reference group, the estimated effect was small and only marginally significant. Overall, the physiological, behavioral, and sleep-related variables included in the model appeared to have a stronger relationship with stress score than the reported workout type.</p>
-<p>The final fitted model is:</p>
+<p>The final fitted model can be written as:</p>
 <p><span class="math display">\[
 \begin{aligned}
 \widehat{\text{Stress Score}}_{ij}
@@ -3839,7 +3849,7 @@ b_{0i}
 +0.00520(\text{Wake After Sleep Onset})
 +b_{0i}.
 \end{aligned}
-\]</span> Here, <span class="math inline">\(i\)</span> indexes participants, <span class="math inline">\(j\)</span> indexes daily observations, and <span class="math inline">\(b_{0i}\)</span> represents the participant-specific random intercept.</p>
+\]</span> where <span class="math inline">\(i\)</span> indexes participants, <span class="math inline">\(j\)</span> indexes daily observations, and <span class="math inline">\(b_{0i}\)</span> represents the participant-specific random intercept.</p>
 <section id="figure-3.-normality-of-residuals" class="level5">
 <h5 class="anchored" data-anchor-id="figure-3.-normality-of-residuals">Figure 3. Normality of Residuals</h5>
 <div class="cell">
@@ -3890,7 +3900,7 @@ b_{0i}
 </div>
 </div>
 </div>
-<p>The assumptions of the final linear mixed model were checked. Figure 3 above shows that the residuals are approximately normally distributed, with only small departures from normality at the extreme ends of the distribution. In Figure 4, the homogeneity of variance plot shows a fairly consistent spread of the residuals across the fitted values, with no strong evidence of increasing or decreasing variance. In Figure 5, the residuals versus fitted values plot also does not show any obvious patterns, indicating that the relationship between the predictors and stress score is approximately linear. Overall, these diagnostic plots suggest that the assumptions of the linear mixed model were reasonably satisfied.</p>
+<p>The assumptions of the final linear mixed model were checked. Figure 3 above shows that the residuals are approximately normally distributed, with only small departures from normality at the extreme ends of the distribution. In Figure 4, the homogeneity of variance plot shows a fairly consistent spread of the residuals across the fitted values, with no strong evidence of increasing or decreasing variance. In Figure 5, the residuals versus fitted values plot also does not show any obvious patterns, indicating that the relationship between the predictors and stress score is approximately linear. Overall, these diagnostic plots suggest that the assumptions of the linear mixed model were generally satisfied.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -3915,7 +3925,7 @@ b_{0i}
 <span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ICC&quot;</span>,</span>
 <span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;RMSE&quot;</span>,</span>
 <span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;MAE&quot;</span>,</span>
-<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Users&quot;</span>,</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Participants&quot;</span>,</span>
 <span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Observations&quot;</span></span>
 <span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>  ),</span>
 <span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">Value =</span> <span class="fu">c</span>(</span>
@@ -3973,7 +3983,7 @@ b_{0i}
 <td style="text-align: left;">4.844</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Users</td>
+<td style="text-align: left;">Participants</td>
 <td style="text-align: left;">300</td>
 </tr>
 <tr class="odd">
@@ -3986,7 +3996,7 @@ b_{0i}
 </div>
 <p>Table 11 summarizes the overall performance of the final linear mixed model. The marginal <span class="math inline">\(R^2\)</span> of 0.726 indicates that the fixed effects explained approximately 72.6% of the variation in stress scores. The conditional <span class="math inline">\(R^2\)</span> was slightly higher (0.729), indicating that the participant-specific random intercept provided a modest additional contribution beyond the fixed effects. Likewise, the ICC of 0.013 suggests that relatively little of the remaining variation in stress scores was attributable to stable differences between participants.</p>
 <p>Although the between-participant variability was relatively small, the linear mixed model remained appropriate because the dataset contained repeated daily observations from the same individuals. Including a participant-specific random intercept accounted for the correlation among observations collected from the same participant while allowing the fixed effects to estimate the relationships between the wearable health measures and stress.</p>
-<p>The RMSE of 6.072 indicates a typical residual error of approximately six stress-score points, with larger prediction errors receiving greater weight. The MAE of 4.884 indicates that the fitted stress scores differed from the observed values by an average of approximately five points.</p>
+<p>The RMSE of 6.072 indicates a typical residual error of approximately six stress-score points, with larger prediction errors receiving greater weight. The MAE of 4.844 indicates that the fitted stress scores differed from the observed values by an average of approximately five points.</p>
 <p>Collectively, these performance metrics indicate that the final model explained a substantial proportion of the variation in stress scores while maintaining relatively small residual errors across the observed data.</p>
 <div class="cell">
 <details class="code-fold">
