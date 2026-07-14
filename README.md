@@ -17,6 +17,5 @@ Which physiological and behavioral health metrics are significant predictors of 
 In Progress
 
 Current Phase:
-- Finishing Methods section
-- Polishing the rest of the paper
+- Polishing the paper
 - Drafting the slides
