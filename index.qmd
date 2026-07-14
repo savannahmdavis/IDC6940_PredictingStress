@@ -143,33 +143,7 @@ library(car)
 # Load Data
 
 df = read_csv("wearables_health_6mo_daily.csv")
-```
 
-```{r}
-# Quick overview of dataset
-
-dataset_overview <- tibble(
-  Metric = c("Total Observations", "Total Variables", "Unique Participants"),
-  Value = c(
-    scales::comma(nrow(df)),
-    scales::comma(ncol(df)),
-    scales::comma(n_distinct(df$user_id))
-  )
-)
-
-dataset_overview %>%
-  kable(caption = "Table 1. Dataset Overview") %>%
-  kable_styling(
-    bootstrap_options = c("striped", "hover", "condensed"),
-    full_width = FALSE
-  )
-```
-
-The raw dataset contains over 55,000 records for 300 distinct participants, with over 30 variables available for model development.
-
-#### Descriptive Statistics
-
-```{r}
 # Rename variables to readable labels
 variable_labels <- c(
   age = "Age",
@@ -200,7 +174,150 @@ variable_labels <- c(
   sleep_stage_light_pct = "Light Sleep (%)",
   stress_score = "Stress Score"
 )
+```
 
+```{r}
+# Quick overview of dataset
+
+dataset_overview <- tibble(
+  Metric = c("Total Observations", "Total Variables", "Unique Participants"),
+  Value = c(
+    scales::comma(nrow(df)),
+    scales::comma(ncol(df)),
+    scales::comma(n_distinct(df$user_id))
+  )
+)
+
+dataset_overview %>%
+  kable(caption = "Table 1. Dataset Overview") %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+The raw dataset contains over 55,000 records for 300 distinct participants, with over 30 variables available for model development.
+
+#### Missing Values
+
+The dataset is investigated for missing values to assess next steps for preprocessing.
+
+```{r}
+# Investigating missing values
+
+missing_values <- df %>%
+  summarise(across(everything(), ~sum(is.na(.)))) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "Variable",
+    values_to = "Missing_Values"
+  ) %>%
+  mutate(
+    Percent_Missing = round(100 * Missing_Values / nrow(df), 2)
+  ) %>%
+  filter(
+    Percent_Missing > 0
+  ) %>%
+  arrange(desc(Missing_Values)) %>%
+  mutate(
+    Variable = ifelse(
+      Variable %in% names(variable_labels),
+      variable_labels[Variable],
+      Variable
+    ),
+    Missing_Values = scales::comma(Missing_Values)
+  )
+
+missing_values %>%
+  rename(
+    `Missing Values` = Missing_Values,
+    `Percent Missing` = Percent_Missing
+  ) %>%
+  kable(
+    caption = "Table 2. Missing Values by Variable"
+  ) %>%
+  kable_styling(
+    bootstrap_options = c(
+      "striped",
+      "hover",
+      "condensed"
+    ),
+    full_width = FALSE
+  )
+```
+
+```{r}
+# Count rows containing at least one missing value
+
+rows_with_missing <- sum(!complete.cases(df))
+
+# Calculate percentage of dataset removed
+
+pct_rows_removed <- round(
+  100 * rows_with_missing / nrow(df),
+  2
+)
+
+missing_summary <- tibble(
+  "Total Observations" = scales::comma(nrow(df)),
+  "Rows With Missing" = scales::comma(rows_with_missing),
+  "Percent Removed" = paste0(pct_rows_removed, "%")
+)
+
+missing_summary %>%
+  kable(
+    caption = "Table 3. Impact of Missing Data Removal"
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+Table 3 reveals that less than 2% of the observations contained at least one missing value, with missing values occurring across several physiological, behavioral, and sleep-related variables. Because only 1.9% of the observations contained missing data, a complete-case analysis was performed by removing incomplete observations prior to model fitting. This resulted in a relatively small loss of data while simplifying the subsequent analyses.
+
+```{r}
+# Remove null values since there aren't many
+df_clean <- na.omit(df)
+
+# Convert categorical data to factor
+df_clean <- df_clean %>%
+  mutate(
+    user_id = as.factor(user_id),
+    gender = as.factor(gender),
+    region = as.factor(region),
+    device_model = as.factor(device_model),
+    workout_type = as.factor(workout_type),
+    mood = as.factor(mood)
+  )
+
+# Select all categorical variables
+categorical_vars <- df_clean %>%
+  select(
+    user_id,
+    gender,
+    region,
+    device_model,
+    workout_type,
+    mood
+  )
+
+# Select all continuous variables
+continuous_vars <- df_clean %>%
+  select(
+    age, height_cm, weight_kg, bmi, resting_hr_bpm,
+    avg_hr_day_bpm, hrv_rmssd_ms, spo2_avg_pct, sbp_mmHg,
+    dbp_mmHg, steps, distance_km, calories_kcal,
+    workout_minutes, caffeine_mg, alcohol_units, screen_time_min, 
+    sleep_duration_hours, sleep_efficiency, sleep_latency_min,
+    wake_after_sleep_onset_min, sleep_stage_rem_pct, sleep_stage_deep_pct, 
+    sleep_stage_light_pct, mindfulness_minutes
+  )
+```
+
+#### Descriptive Statistics
+
+```{r}
 # Function to create descriptive statistics tables
 
 create_descriptive_table <- function(data, variables, caption) {
@@ -247,14 +364,14 @@ minimum, median, and maximum values.
 # Demographic fields
 
 create_descriptive_table(
-  df,
+  df_clean,
   c(
     "age",
     "height_cm",
     "weight_kg",
     "bmi"
   ),
-  "Table 2. Demographic Characteristics"
+  "Table 4. Demographic Characteristics"
 )
 ```
 
@@ -263,7 +380,7 @@ create_descriptive_table(
 # Physiological fields
 
 create_descriptive_table(
-  df,
+  df_clean,
   c(
     "resting_hr_bpm",
     "avg_hr_day_bpm",
@@ -272,7 +389,7 @@ create_descriptive_table(
     "sbp_mmHg",
     "dbp_mmHg"
   ),
-  "Table 3. Physiological Characteristics"
+  "Table 5. Physiological Characteristics"
 )
 ```
 
@@ -280,7 +397,7 @@ create_descriptive_table(
 # Behavioral fields
 
 create_descriptive_table(
-  df,
+  df_clean,
   c(
     "steps",
     "distance_km",
@@ -291,7 +408,7 @@ create_descriptive_table(
     "screen_time_min",
     "mindfulness_minutes"
   ),
-  "Table 4. Behavioral Characteristics"
+  "Table 6. Behavioral Characteristics"
 )
 ```
 
@@ -299,7 +416,7 @@ create_descriptive_table(
 # Sleep fields
 
 create_descriptive_table(
-  df,
+  df_clean,
   c(
     "sleep_duration_hours",
     "sleep_efficiency",
@@ -309,7 +426,7 @@ create_descriptive_table(
     "sleep_stage_deep_pct",
     "sleep_stage_light_pct"
   ),
-  "Table 5. Sleep Characteristics"
+  "Table 7. Sleep Characteristics"
 )
 ```
 
@@ -317,91 +434,13 @@ create_descriptive_table(
 # Outcome variable
 
 create_descriptive_table(
-  df,
+  df_clean,
   c(
     "stress_score"
   ),
-  "Table 6. Stress Score Summary"
+  "Table 8. Stress Score Summary"
 )
 ```
-
-#### Missing Values
-
-The dataset is investigated for missing values to assess next steps for preprocessing.
-
-```{r}
-# Investigating missing values
-
-missing_values <- df %>%
-  summarise(across(everything(), ~sum(is.na(.)))) %>%
-  pivot_longer(
-    cols = everything(),
-    names_to = "Variable",
-    values_to = "Missing_Values"
-  ) %>%
-  mutate(
-    Percent_Missing = round(100 * Missing_Values / nrow(df), 2)
-  ) %>%
-  filter(
-    Percent_Missing > 0
-  ) %>%
-  arrange(desc(Missing_Values)) %>%
-  mutate(
-    Variable = ifelse(
-      Variable %in% names(variable_labels),
-      variable_labels[Variable],
-      Variable
-    ),
-    Missing_Values = scales::comma(Missing_Values)
-  )
-
-missing_values %>%
-  rename(
-    `Missing Values` = Missing_Values,
-    `Percent Missing` = Percent_Missing
-  ) %>%
-  kable(
-    caption = "Table 7. Missing Values by Variable"
-  ) %>%
-  kable_styling(
-    bootstrap_options = c(
-      "striped",
-      "hover",
-      "condensed"
-    ),
-    full_width = FALSE
-  )
-```
-
-```{r}
-# Count rows containing at least one missing value
-
-rows_with_missing <- sum(!complete.cases(df))
-
-# Calculate percentage of dataset removed
-
-pct_rows_removed <- round(
-  100 * rows_with_missing / nrow(df),
-  2
-)
-
-missing_summary <- tibble(
-  "Total Observations" = scales::comma(nrow(df)),
-  "Rows With Missing" = scales::comma(rows_with_missing),
-  "Percent Removed" = paste0(pct_rows_removed, "%")
-)
-
-missing_summary %>%
-  kable(
-    caption = "Table 8. Impact of Missing Data Removal"
-  ) %>%
-  kable_styling(
-    bootstrap_options = c("striped", "hover", "condensed"),
-    full_width = FALSE
-  )
-```
-
-Table 8 reveals that less than 2% of the observations contained at least one missing value, with missing values occurring across several physiological, behavioral, and sleep-related variables. Because only 1.9% of the observations contained missing data, a complete-case analysis was performed by removing incomplete observations prior to model fitting. This resulted in a relatively small loss of data while simplifying the subsequent analyses.
 
 #### Stress Distribution
 
@@ -410,7 +449,7 @@ Before fitting the linear mixed model, the distribution of the outcome variable 
 ```{r}
 # Investigating distribution of stress score within the dataset
 
-ggplot(df, aes(x = stress_score)) +
+ggplot(df_clean, aes(x = stress_score)) +
   geom_histogram(bins = 20) +
   labs(
     title = "Figure 1. Distribution of Stress Scores",
@@ -426,45 +465,7 @@ Figure 1 shows that the distribution appears to be approximately normal with no 
 ### Modeling and Results
 
 
-```{r}
-# Remove null values since there aren't many
-df_clean <- na.omit(df)
-
-# Convert categorical data to factor
-df_clean <- df_clean %>%
-  mutate(
-    user_id = as.factor(user_id),
-    gender = as.factor(gender),
-    region = as.factor(region),
-    device_model = as.factor(device_model),
-    workout_type = as.factor(workout_type),
-    mood = as.factor(mood)
-  )
-
-# Select all categorical variables
-categorical_vars <- df_clean %>%
-  select(
-    user_id,
-    gender,
-    region,
-    device_model,
-    workout_type,
-    mood
-  )
-
-# Select all continuous variables
-continuous_vars <- df_clean %>%
-  select(
-    age, height_cm, weight_kg, bmi, resting_hr_bpm,
-    avg_hr_day_bpm, hrv_rmssd_ms, spo2_avg_pct, sbp_mmHg,
-    dbp_mmHg, steps, distance_km, calories_kcal,
-    workout_minutes, caffeine_mg, alcohol_units, screen_time_min, 
-    sleep_duration_hours, sleep_efficiency, sleep_latency_min,
-    wake_after_sleep_onset_min, sleep_stage_rem_pct, sleep_stage_deep_pct, 
-    sleep_stage_light_pct, mindfulness_minutes
-  )
-```
-
+#### Variable Selection
 
 Before fitting the model, the continuous variables were checked for correlation. Highly correlated predictors can provide overlapping information, making it difficult to determine the individual effect of each variable. The correlation heatmap was used to identify highly correlated predictor variables prior to model fitting.
 
@@ -597,24 +598,30 @@ lmm_final <- lmer(
 #summary(lmm_final)
 ```
 
-
 Variables that demonstrated limited contribution to the interpretation of the initial model were removed to simplify the model while retaining the primary wearable health measures of interest. The final model included workout type, HRV, distance traveled, caffeine intake, alcohol consumption, screen time, mindfulness minutes, sleep duration, sleep efficiency, and wake after sleep onset.
 
 After removing the additional predictors, the remaining coefficient estimates and significance levels were similar to those observed in the initial model. This indicates that the main relationships identified in the initial model were preserved despite using fewer predictors.
 
 Overall, the reduced model was easier to interpret while maintaining the primary relationships between the wearable health variables and stress score.
 
+#### Model Results
+
 ```{r}
-# This table summarizes the statistical significance of each predictor retained in the final model
-coef_table <- broom.mixed::tidy(lmm_final)
+# This table summarizes the fixed effects retained in the final model
+
+coef_table <- broom.mixed::tidy(
+  lmm_final,
+  conf.int = TRUE,
+  conf.level = 0.95
+)
 
 coef_table %>%
   filter(effect == "fixed") %>%
   select(
     term,
     estimate,
-    std.error,
-    statistic,
+    conf.low,
+    conf.high,
     p.value
   ) %>%
   mutate(
@@ -628,22 +635,31 @@ coef_table %>%
         term
       )
     ),
-    across(
-      c(estimate, std.error, statistic),
-      ~ round(.x, 3)
+    estimate = round(estimate, 3),
+    `95% CI` = paste0(
+      "(",
+      round(conf.low, 4),
+      ", ",
+      round(conf.high, 4),
+      ")"
     ),
     p.value = ifelse(
       p.value < .001,
       "<0.001",
-      round(p.value, 3)
+      round(p.value, 4)
     )
+  ) %>%
+  select(
+    term,
+    estimate,
+    `95% CI`,
+    p.value
   ) %>%
   kable(
     col.names = c(
       "Variable",
-      "Estimate",
-      "Std. Error",
-      "t Statistic",
+      "Coefficient",
+      "95% Confidence Interval",
       "p-value"
     ),
     caption = "Table 10. Fixed Effects from Final Linear Mixed Model"
@@ -659,20 +675,20 @@ coef_table %>%
 ```
 
 
-Table 10 summarizes the fixed effects from the final linear mixed model. The coefficients describe the estimated relationship between each predictor and stress score after accounting for the repeated measurements collected from each participant.
+Table 10 presents the estimated fixed-effect coefficients, 95% confidence intervals, and p-values for the final linear mixed model. The coefficients represent the estimated association between each predictor and stress score while accounting for the repeated measurements collected from each participant.
 
-Several physiological and behavioral variables were significant predictors of stress. Higher HRV, greater distance traveled, more mindfulness minutes, longer sleep duration, and higher sleep efficiency were all associated with lower stress scores. In contrast, greater caffeine intake, alcohol consumption, screen time, and waking after sleep onset were associated with higher stress scores. These findings suggest that longer sleep duration, higher sleep efficiency, higher HRV, greater distance traveled, and mindfulness are associated with lower levels of stress, while greater caffeine consumption, alcohol use, screen time, and waking after sleep onset are associated with higher stress levels.
+Several physiological and behavioral variables were significantly associated with stress score. Higher heart rate variability (HRV), greater distance traveled, more mindfulness minutes, longer sleep duration, and higher sleep efficiency were associated with lower stress scores. In contrast, greater caffeine intake, alcohol consumption, screen time, and waking after sleep onset were associated with higher stress scores. For each of these predictors, the 95% confidence interval did not include zero, providing evidence of a statistically significant association with stress score.
 
-None of the workout type indicator variables were statistically significant after accounting for the remaining predictors. Although participants who reported running tended to have slightly lower stress scores than the reference group, the estimated effect was small and only marginally significant. Overall, the physiological, behavioral, and sleep-related variables included in the model appeared to have a stronger relationship with stress score than the reported workout type.
+None of the workout type indicator variables were statistically significant after accounting for the remaining predictors. Although participants who reported running tended to have slightly lower stress scores than the reference group, the estimated effect was small and the 95% confidence interval included zero. Although workout type was not statistically significant, it was retained because physical activity is an important behavioral variable in wearable health research and was included to evaluate whether different forms of exercise were associated with stress after accounting for other physiological and behavioral measures.
 
-
+#### Final Fitted Model
 
 The final fitted model can be written as:
 
 $$
 \begin{aligned}
 \widehat{\text{Stress Score}}_{ij}
-&= 116.1
+&= 116.118
 -0.135(\text{Workout}_{\text{Mixed}})
 +0.084(\text{Workout}_{\text{None}})
 -0.195(\text{Workout}_{\text{Run}})\\
@@ -683,42 +699,45 @@ $$
 &\quad
 -0.258(\text{HRV})
 -0.442(\text{Distance})
-+0.0396(\text{Caffeine})
++0.0340(\text{Caffeine})
 +4.577(\text{Alcohol})\\
 &\quad
-+0.0324(\text{Screen Time})
--0.0417(\text{Mindfulness})
++0.032(\text{Screen Time})
+-0.042(\text{Mindfulness})
 -5.974(\text{Sleep Duration})\\
 &\quad
 -9.564(\text{Sleep Efficiency})
-+0.00520(\text{Wake After Sleep Onset})
++0.005(\text{Wake After Sleep Onset})
 +b_{0i}.
 \end{aligned}
 $$
 where $i$ indexes participants, $j$ indexes daily observations, and $b_{0i}$ represents the participant-specific random intercept.
 
-##### Figure 3. Normality of Residuals
+#### Model Assumptions Check
+
+
+###### Figure 3. Normality of Residuals
 
 ```{r}
 # Check model diagnostics
 check_model(lmm_final, check = "qq")
 ```
 
-##### Figure 4. Homogeneity of Variance
+###### Figure 4. Homogeneity of Variance
 
 ```{r}
 # Check model diagnostics
 check_model(lmm_final, check = "homogeneity")
 ```
 
-##### Figure 5. Linearity
+###### Figure 5. Linearity
 
 ```{r}
 # Check model diagnostics
 check_model(lmm_final, check = "linearity")
 ```
 
-##### Figure 6. Normality of Random Effects
+###### Figure 6. Normality of Random Effects
 ```{r}
 check_model(lmm_final, check = "reqq")
 ```
@@ -726,6 +745,7 @@ check_model(lmm_final, check = "reqq")
 
 The assumptions of the final linear mixed model were checked. Figure 3 shows that the residuals are approximately normally distributed, with only small departures from normality at the extreme ends of the distribution. Figure 4 shows a fairly consistent spread of the residuals across the fitted values, with no strong evidence of increasing or decreasing variance, suggesting that the assumption of homogeneity of variance was reasonably satisfied. Figure 5 shows no obvious patterns in the residuals versus the fitted values, indicating that the relationship between the predictors and stress score is approximately linear. Finally, Figure 6 shows that the participant-specific random effects are approximately normally distributed, with only minor deviations from the reference line in the tails. Overall, these diagnostic plots suggest that the assumptions of the linear mixed model were reasonably satisfied.
 
+#### Model Performance
 
 ```{r}
 # Calculate model performance metrics
@@ -820,7 +840,7 @@ ggplot(
 Figure 7 above compares the observed stress scores with the fitted values produced by the final linear mixed model. Most observations fall relatively close to the reference line, indicating that the fitted values generally correspond well with the observed stress scores. Although some variability remains, the overall pattern suggests that the model provides a good representation of the observed data.
 
 
-### Conclusion
+## Conclusion
 
 Overall, the final linear mixed model identified several physiological, behavioral, and sleep-related variables that were associated with stress within this synthetic wearable health dataset. In particular, measures related to heart rate variability, physical activity, sleep quality, mindfulness, caffeine intake, alcohol consumption, and screen time were significantly associated with stress after accounting for repeated measurements within participants. The final model satisfied the evaluated assumptions, explained a substantial proportion of the variation in stress scores, and provided a good overall fit to the observed data.
 
