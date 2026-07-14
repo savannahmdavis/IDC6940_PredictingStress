@@ -26,23 +26,38 @@ Slides: [slides.html](slides.html){target="_blank"}
   Stress is a state where the emotional, psychological, or physiological systems of an individual experience a demand that exceeds their knowledge and ability to resolve. Whether perceived consciously or unconsciously, the body then responds by prompting organs and glands to produce hormones that will assist the individual in adapting to the situation. Normal physiological responses to acute stress are short-lived and allow the body to return to its natural state without any long-term consequences. However, chronic stress, which is the result of unresolved long-standing demands and challenges can result in physical complications and disease in the body [@can2022survey]. In fact, the effects of chronic stress are so serious that research in Europe showed stress as the second most severe work-related health issue [@can2022survey]. Insights on stress can of course be self-reported by individuals, however, more efficient and accurate means of tracking stress can be accomplished via wearable devices such as Fitbit and Garmin.
 
 	 
-  Wearable devices can collect a wide range of data such as: heart rate, heart rate variability (HRV), sleep quality, physical activity, and movement patterns [@namvari2022ppg; @wang2024heart]. Out of those variables, researchers select the physiological ones that are directly influenced by the autonomic nervous system (ANS), mainly because stress is fundamentally an ANS response. The ANS regulates involuntary bodily functions and also consists of the sympathetic (SNS) and parasympathetic nervous systems (PNS) which maintain homeostasis within the body [@chalmers2022sleep]. During periods of stress, the SNS activates which results in elevated heart rates and changes in HRV, which makes those important variables to include in stress prediction research. Additionally, sleep, physical activity, circadian rhythms, and environmental conditions also contribute to stress and researchers often incorporate them when developing stress prediction models [@wang2024heart].
+  Wearable devices can collect a wide range of data such as: heart rate, heart rate variability (HRV), sleep quality, physical activity, and movement patterns [@namvari2022ppg; @wang2024heart]. Out of those variables, researchers select the physiological ones that are directly influenced by the autonomic nervous system (ANS), mainly because stress is fundamentally an ANS response. The ANS regulates involuntary bodily functions and also consists of the sympathetic (SNS) and parasympathetic nervous systems (PNS) which maintain homeostasis within the body [@chalmers2022sleep]. During periods of stress, the SNS activates which results in elevated heart rates and changes in HRV, which makes those important variables to include in stress prediction research. Additionally, sleep, physical activity, circadian rhythms, and environmental conditions also contribute to stress and researchers often incorporate them when developing stress prediction models [@wang2024heart; @vankraaij2020chronic].
 	
   
-  While physiological variables such as heart rate and HRV provide valuable information about how the body responds to stress, researchers have found that behavioral and lifestyle factors also contribute to stress levels. Sleep duration, sleep quality, sleep efficiency, screen time, caffeine consumption, alcohol use, and mindfulness practices all have been shown to affect overall well-being [@vidalbustamante2024sleep; @booth2022stress]. Out of those listed factors, sleep has been identified as one of the strongest predictors of perceived stress, as disruptions influence an individual's ability to adapt to daily demands [@bloomfield2024sleep]. So, to increase the accuracy of stress prediction, researchers have concluded that combining physiological signals with lifestyle factors improves the ability to predict individuals experiencing higher levels of stress [@sano2018markers].
+  While physiological variables such as heart rate and HRV provide valuable information about how the body responds to stress, researchers have found that behavioral and lifestyle factors also contribute to stress levels. Sleep duration, sleep quality, sleep efficiency, screen time, caffeine consumption, alcohol use, and mindfulness practices all have been shown to affect overall well-being [@vidalbustamante2024sleep; @booth2022stress]. Out of those listed factors, sleep has been identified as one of the strongest predictors of perceived stress, as disruptions influence an individual's ability to adapt to daily demands [@bloomfield2024sleep]. So, to increase the accuracy of stress prediction, researchers have concluded that combining physiological signals with lifestyle factors improves the ability to predict individuals experiencing higher levels of stress [@sano2018markers]. More recent work has also shown that wearable devices can successfully identify periods of stress in real-world environments, further demonstrating their potential for continuous stress monitoring [@neigel2024wearables].
 
 
-  Based on previous research, both physiological and behavioral measures appear to contribute to stress. This study builds on that work by examining these relationships using a synthetic longitudinal wearable dataset consisting of 300 participants observed over a six-month period, resulting in more than 55,000 observations. The dataset includes physiological and behavioral measures such as heart rate variability (HRV), sleep duration, sleep efficiency, caffeine consumption, alcohol use, screen time, mindfulness, and physical activity, along with daily stress scores.
+  Based on previous research, both physiological and behavioral measures appear to contribute to stress. Publicly available wearable datasets, such as WESAD, have also contributed to the development and evaluation of stress detection models using wearable data by providing benchmark data for physiological stress research [@schmidt2018wesad]. Building on this body of research, this study examines these relationships using a synthetic longitudinal wearable dataset consisting of 300 participants observed over a six-month period, resulting in more than 55,000 observations. The dataset includes physiological and behavioral measures such as heart rate variability (HRV), sleep duration, sleep efficiency, caffeine consumption, alcohol use, screen time, mindfulness, and physical activity, along with daily stress scores.
 
 
-  The purpose of this study is to identify physiological and behavioral predictors of stress using longitudinal wearable health data and evaluate the ability of a linear mixed model to predict stress scores over time. Because the dataset contains repeated measurements from the same participants, a linear mixed model was selected to account for the correlation among observations collected from the same individual. Linear mixed models are well suited for longitudinal data because they account for repeated observations while capturing both population-level trends and variation between individuals [@silveira2023mixedeffects; @harrison2018mixed].
+  The purpose of this study is to identify physiological and behavioral predictors of stress using longitudinal wearable health data and evaluate the ability of a linear mixed model (LMM) to predict stress scores over time. Because the dataset contains repeated measurements from the same participants, a linear mixed model was selected to account for the correlation among observations collected from the same individual. Linear mixed models are well suited for longitudinal data because they account for repeated observations while capturing both population-level trends and variation between individuals [@silveira2023mixedeffects; @harrison2018mixed].
 
 
 ## Methods
 
-** STILL IN PROGRESS **
+#### Linear Mixed Model Overview
 
-A basic linear mixed model can be written as:
+An LMM is commonly used when the outcome variable is continuous and the data contain grouped, clustered, longitudinal, or repeated measurements [@detry2016repeated; @harrison2018mixed; @murphy2022accessible]. Unlike a standard linear regression, an LMM can account for situations where multiple observations come from the same subject or group. In this project, each participant contributes daily wearable measurements over a six-month period. A standard linear regression assumes that observations are independent, so that assumption is violated for this dataset. A linear mixed model accounts for the repeated observations within each participant while still estimating the overall relationship between the predictor variables and stress score.
+
+A linear mixed model extends standard linear regression by including both fixed effects and random effects. Fixed effects estimate the average relationship between the predictor variables and the outcome across all participants. Random effects account for differences between participants by allowing each one to have their own baseline value. Together, these two components make the model well suited for repeated-measures data where observations are nested within individuals [@harrison2018mixed].
+
+#### General Model Form
+
+The general form of a linear mixed model can be written as:
+
+$$
+{y} = {X}{\beta} + {Z}{u} + {\varepsilon}
+$$
+In this equation, ${X}{\beta}$ represents the fixed-effect portion of the model, or the average relationship between the predictor variables and the outcome. The term ${Z}{u}$ represents the random-effect portion of the model, which accounts for differences between users. The residual error term, ${\varepsilon}$, represents the variation that is not explained by either the fixed or random effects.
+
+#### Repeated-Measures Structure
+
+For repeated-measures data, the model can also be written at the observation level as:
 
 $$
 y_{ij}
@@ -70,12 +85,47 @@ where:
 - $b_{0i}$ = participant-specific random intercept
 - $\varepsilon_{ij}$ = residual error
 
+#### Project Model
+
+The model used in this project can be represented generally as:
+
+stress_score ~ daily predictors + (1 | user_id)
+
+The term (1 | user_id) specifies a random intercept for each participant. This allows the model to account for repeated observations from the same participant instead of treating every row as completely independent. The daily predictor variables are treated as fixed effects because the goal is to estimate their average relationship with stress score across the full dataset.
+
+This model fits the project because the dataset contains daily wearable measurements from 300 simulated participants over approximately six months. Since each participant contributes multiple observations, the data have a repeated-measures structure with observations nested within participants. A linear mixed model accounts for this structure while estimating the relationship between the daily predictor variables and stress score.
+
+#### Parameter Estimation
+
+The linear mixed model was estimated using restricted maximum likelihood (REML), which is the default estimation method used by the lmer() function in R. REML is commonly used because it generally provides less biased estimates of the random-effect variance than ordinary maximum likelihood estimation. Since this project focused on fitting a final model rather than comparing multiple competing models, REML was appropriate for the analysis.
+
+#### Model Assumptions
+
+The main assumptions of a linear mixed model are:
+
+- The relationship between the predictor variables and the outcome is approximately linear.
+
+- The residual errors are approximately normally distributed.
+
+- The residual variance is reasonably consistent across fitted values.
+
+- The random effects are approximately normally distributed with a mean of zero.
+
+- The random effects and residual errors are independent of one another.
+
+Violations of these assumptions can affect model performance and the validity of statistical conclusions, making it important to evaluate diagnostic plots before interpreting the results [@yang2014adv].
+
+#### Interpretation
+
+The fixed effects describe the average relationship between the wearable, physiological, sleep, and behavioral predictors and stress score across all participants. The random intercept accounts for differences in baseline stress between participants while recognizing that repeated observations from the same participant are related. By accounting for this repeated-measures structure, the model provides a more appropriate analysis than a standard linear regression for this type of data.
+
+Because the dataset is synthetic, the results should be interpreted as a demonstration of the modeling approach rather than clinical evidence. The purpose of this analysis is to demonstrate how a linear mixed model can be used to analyze repeated wearable measurements while accounting for the correlation between observations from the same participant.
 
 ## Analysis and Results
 
 ### Data Exploration and Visualization
 
-This report utilizes the *Health + Wellness + Stress/Sleep Tracking* dataset obtained from Kaggle. The dataset contains wearable health and behavioral measurements for 300 simulated participants over a 6-month period. The dataset contains demographic, physiological, behavioral, and sleep-related variables collected daily from wearable devices. A linear mixed model is appropriate for this dataset because observations from the same participant are not independent, violating a key assumption of ordinary linear regression. [@kaggle_dataset]
+This report utilizes the *Health + Wellness + Stress/Sleep Tracking (Synthetic)* dataset obtained from Kaggle [@kaggle_dataset]. The dataset contains wearable health and behavioral measurements for 300 simulated participants over a 6-month period. The dataset contains demographic, physiological, behavioral, and sleep-related variables collected daily from wearable devices. A linear mixed model is appropriate for this dataset because observations from the same participant are not independent, violating a key assumption of ordinary linear regression.
 
 ```{r setup, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -668,8 +718,14 @@ check_model(lmm_final, check = "homogeneity")
 check_model(lmm_final, check = "linearity")
 ```
 
+##### Figure 6. Normality of Random Effects
+```{r}
+check_model(lmm_final, check = "reqq")
+```
 
-The assumptions of the final linear mixed model were checked. Figure 3 above shows that the residuals are approximately normally distributed, with only small departures from normality at the extreme ends of the distribution. In Figure 4, the homogeneity of variance plot shows a fairly consistent spread of the residuals across the fitted values, with no strong evidence of increasing or decreasing variance. In Figure 5, the residuals versus fitted values plot also does not show any obvious patterns, indicating that the relationship between the predictors and stress score is approximately linear. Overall, these diagnostic plots suggest that the assumptions of the linear mixed model were generally satisfied.
+
+The assumptions of the final linear mixed model were checked. Figure 3 shows that the residuals are approximately normally distributed, with only small departures from normality at the extreme ends of the distribution. Figure 4 shows a fairly consistent spread of the residuals across the fitted values, with no strong evidence of increasing or decreasing variance, suggesting that the assumption of homogeneity of variance was reasonably satisfied. Figure 5 shows no obvious patterns in the residuals versus the fitted values, indicating that the relationship between the predictors and stress score is approximately linear. Finally, Figure 6 shows that the participant-specific random effects are approximately normally distributed, with only minor deviations from the reference line in the tails. Overall, these diagnostic plots suggest that the assumptions of the linear mixed model were reasonably satisfied.
+
 
 ```{r}
 # Calculate model performance metrics
@@ -753,7 +809,7 @@ ggplot(
     linetype = "dashed"
   ) +
   labs(
-    title = "Figure 6. Observed versus Fitted Stress Scores",
+    title = "Figure 7. Observed versus Fitted Stress Scores",
     x = "Observed Stress Score",
     y = "Fitted Stress Score"
   ) +
@@ -761,7 +817,7 @@ ggplot(
 ```
 
 
-Figure 6 above compares the observed stress scores with the fitted values produced by the final linear mixed model. Most observations fall relatively close to the reference line, indicating that the fitted values generally correspond well with the observed stress scores. Although some variability remains, the overall pattern suggests that the model provides a good representation of the observed data.
+Figure 7 above compares the observed stress scores with the fitted values produced by the final linear mixed model. Most observations fall relatively close to the reference line, indicating that the fitted values generally correspond well with the observed stress scores. Although some variability remains, the overall pattern suggests that the model provides a good representation of the observed data.
 
 
 ### Conclusion
