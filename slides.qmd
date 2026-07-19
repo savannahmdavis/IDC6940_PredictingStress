@@ -4,114 +4,599 @@ subtitle: "Using Synthetic Longitudinal Wearable Device Data"
 author: "Savannah Davis<br>Bryce Mattos<br>Jessica Jones<br>Jordan Gainey<br>(Advisor: Dr. Cohen)"
 date: '`r Sys.Date()`'
 format:
-  revealjs
+  revealjs:
+    theme: simple
+    width: 1600
+    height: 900
+    margin: 0.06
+    slide-number: true
+    transition: fade
+    incremental: false
+    code-fold: true
+    code-summary: "Show code"
+    footer: "Modeling Stress from Wearable Health Data - LMM"
+execute:
+  echo: false
+  warning: false
+  message: false
+editor:
+  markdown:
+    wrap: 72
 course: Capstone Projects in Data Science
 bibliography: references.bib # file contains bibtex for references
 #always_allow_html: true # this allows to get PDF with HTML features
 self-contained: true
-execute: 
-  warning: false
-  message: false
-editor: 
-  markdown: 
-    wrap: 72
+include-in-header:
+  text: |
+    <style>
+    .reveal {
+      font-size: 42px;
+    }
+
+    .reveal h1 {
+      font-size: 2.15em;
+    }
+
+    .reveal h2 {
+      font-size: 1.65em;
+      margin-bottom: 0.45em;
+    }
+
+    .reveal h3 {
+      font-size: 1.25em;
+    }
+
+    .reveal p,
+    .reveal li {
+      line-height: 1.25;
+    }
+
+    .reveal table {
+      font-size: 0.92em;
+    }
+
+    .reveal .slide > img,
+    .reveal .slide > p > img {
+      max-height: 620px;
+    }
+
+    .reveal .callout {
+      font-size: 0.88em;
+    }
+
+    .section-slide h1 {
+      font-size: 2.7em;
+      color: white;
+    }
+    </style>
 ---
 
-::: callout-important
-**Remember:** Your goal is to make your audience understand and care
-about your findings. By crafting a compelling story, you can effectively
-communicate the value of your data science project.
-
-Carefully read this template since it has instructions and tips to
-writing!
-
-More information about `revealjs`:
-<https://quarto.org/docs/reference/formats/presentations/revealjs.html>
-:::
-
-## Introduction  {.smaller}
-
--   Develop a storyline that captures attention and maintains interest.
-
--   Your audience is your peers
-
--   Clearly state the problem or question you're addressing.
-
--   Introduce why it is relevant needs.
-
--   Provide an overview of your approach.
-
-In kernel estimator, weight function is known as kernel function
-[@efr2008]. Cite this paper [@bro2014principal]. The GEE [@wang2014].
-The PCA [@daffertshofer2004pca]\*
-
-## Methods
-
--   Detail the models or algorithms used.
-
--   Justify your choices based on the problem and data.
-
-
-
-## Data Exploration and Visualization
-
--   Describe your data sources and collection process.
-
--   Present initial findings and insights through visualizations.
-
--   Highlight unexpected patterns or anomalies.
-
-## Data Exploration and Visualization {.smaller}
-
-A study was conducted to determine how...
-
-```{r, warning=FALSE, echo=F, message=FALSE}
-# loading packages 
-library(tidyverse)
-library(knitr)
-library(ggthemes)
-library(ggrepel)
-library(dslabs)
-```
-
-```{r, warning=FALSE, echo=F}
-# Load Data
-#kable(head(murders))
-
-ggplot1 = murders %>% ggplot(mapping = aes(x=population/10^6, y=total)) 
-
-  ggplot1 + geom_point(aes(col=region), size = 4) +
-  geom_text_repel(aes(label=abb)) +
-  scale_x_log10() +
-  scale_y_log10() +
-  geom_smooth(formula = "y~x", method=lm,se = F)+
-  xlab("Populations in millions (log10 scale)") + 
-  ylab("Total number of murders (log10 scale)") +
-  ggtitle("US Gun Murders in 2010") +
-  scale_color_discrete(name = "Region")+
-      theme_bw()
-  
-
-```
-
-## Modeling and Results
-
--   Explain your data preprocessing and cleaning steps.
-
--   Present your key findings in a clear and concise manner.
-
--   Use visuals to support your claims.
-
--   **Tell a story about what the data reveals.**
 
 ```{r}
+#| label: setup
+#| include: false
 
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(corrplot)
+library(lme4)
+library(lmerTest)
+library(performance)
+library(broom.mixed)
+
+df <- read_csv("wearables_health_6mo_daily.csv", show_col_types = FALSE)
+
+df_clean <- df %>%
+  drop_na() %>%
+  mutate(
+    across(c(gender, region, device_model, workout_type), as.factor),
+    user_id = as.factor(user_id)
+  )
+
+variable_labels <- c(
+  age = "Age",
+  height_cm = "Height (cm)",
+  weight_kg = "Weight (kg)",
+  bmi = "BMI",
+  resting_hr_bpm = "Resting Heart Rate",
+  avg_hr_day_bpm = "Avg Heart Rate",
+  hrv_rmssd_ms = "HRV (RMSSD)",
+  spo2_avg_pct = "Average SpO₂ (%)",
+  sbp_mmHg = "Systolic Blood Pressure",
+  dbp_mmHg = "Diastolic Blood Pressure",
+  steps = "Steps",
+  distance_km = "Distance (km)",
+  calories_kcal = "Calories",
+  workout_minutes = "Workout Duration (min)",
+  caffeine_mg = "Caffeine (mg)",
+  alcohol_units = "Alcohol (units)",
+  screen_time_min = "Screen time (min)",
+  mindfulness_minutes = "Mindfulness (min)",
+  sleep_duration_hours = "Sleep duration (hours)",
+  sleep_efficiency = "Sleep efficiency",
+  sleep_latency_min = "Sleep Latency (min)",
+  wake_after_sleep_onset_min = "Wake after sleep onset (min)",
+  sleep_stage_rem_pct = "REM Sleep (%)",
+  sleep_stage_deep_pct = "Deep Sleep (%)",
+  sleep_stage_light_pct = "Light Sleep (%)"
+)
+
+continuous_vars <- df_clean %>%
+  select(
+    age, height_cm, weight_kg, bmi, resting_hr_bpm,
+    avg_hr_day_bpm, hrv_rmssd_ms, spo2_avg_pct, sbp_mmHg,
+    dbp_mmHg, steps, distance_km, calories_kcal,
+    workout_minutes, caffeine_mg, alcohol_units, screen_time_min,
+    sleep_duration_hours, sleep_efficiency, sleep_latency_min,
+    wake_after_sleep_onset_min, sleep_stage_rem_pct, sleep_stage_deep_pct,
+    sleep_stage_light_pct, mindfulness_minutes
+  )
+
+lmm_final <- lmer(
+  stress_score ~ workout_type + hrv_rmssd_ms + distance_km +
+    caffeine_mg + alcohol_units + screen_time_min +
+    mindfulness_minutes + sleep_duration_hours + sleep_efficiency +
+    wake_after_sleep_onset_min + (1 | user_id),
+  data = df_clean
+)
 ```
+
+# Introduction {background-color="#176B87" background-transition="fade" .section-slide}
+
+## Why Study Stress?
+
+- Chronic stress can contribute to serious physical and psychological health
+  consequences [@can2022survey].
+- Self-reported stress is useful, but it is intermittent and subjective.
+- Wearable devices continuously capture physiological and behavioral signals
+  that may help identify changes associated with stress.
+
+Wearable stress research commonly uses physiological signals influenced by the
+autonomic nervous system, including heart rate and HRV
+[@namvari2022ppg; @wang2024heart; @chalmers2022sleep].
+
+
+## Why Wearable Data?
+
+Wearables can capture multiple dimensions of daily life:
+
+| Physiological | Behavioral | Sleep |
+|---|---|---|
+| Heart rate variability | Physical activity | Duration |
+| Heart rate | Caffeine and alcohol | Efficiency |
+| Oxygen saturation | Screen time | Wake after sleep onset |
+| Blood pressure | Mindfulness | Sleep latency |
+
+Stress is multifaceted, so combining these measures may be more informative
+than using a single signal [@sano2018markers; @neigel2024wearables]. Sleep,
+activity, environmental conditions, caffeine, alcohol, screen time, and
+mindfulness may also contribute to stress and well-being
+[@vankraaij2020chronic; @vidalbustamante2024sleep; @booth2022stress].
+
+Sleep has been identified as an especially important predictor of perceived
+stress in longitudinal wearable research [@bloomfield2024sleep].
+
+## Research Objective
+
+
+Identify physiological and behavioral predictors of stress and evaluate how
+well a linear mixed model explains daily stress scores.
+
+
+
+We focused on two questions:
+
+1. Which wearable, behavioral, and sleep measures are associated with stress?
+2. How well does the final model fit the observed stress scores?
+
+# Methods {background-color="#176B87" background-transition="fade" .section-slide}
+
+## Why a Linear Mixed Model?
+
+Each participant contributed many daily observations.
+
+::: {.columns}
+::: {.column width="48%"}
+### Standard regression
+
+- Assumes observations are independent
+- Would treat every daily record as unrelated
+:::
+
+::: {.column width="4%"}
+:::
+
+::: {.column width="48%"}
+### Linear mixed model
+
+- Recognizes repeated days within participants
+- Estimates population effects
+- Allows participant-specific baselines
+:::
+:::
+
+A standard linear regression assumes independent observations; that assumption
+is not appropriate for this repeated-measures structure
+[@detry2016repeated; @murphy2022accessible]. LMMs are designed to estimate
+population-level relationships while accounting for observations nested within
+participants [@harrison2018mixed; @silveira2023mixedeffects].
+
+## Model Structure
+
+$$
+y_{ij} = \beta_0 + \beta_1X_{1ij} + \cdots + \beta_pX_{pij}
++ b_{0i} + \varepsilon_{ij}
+$$
+
+- $y_{ij}$: stress score for participant $i$ on day $j$
+- $\beta_0, \ldots, \beta_p$: average or **fixed effects**
+- $b_{0i}$: participant-specific **random intercept**
+- $\varepsilon_{ij}$: unexplained daily variation
+
+The random intercept allows each participant to have a different baseline
+stress level.
+
+# Data Exploration and Visualization {background-color="#176B87" background-transition="fade" .section-slide}
+
+## Dataset
+
+```{r}
+#| label: dataset-overview
+
+tibble(
+  `Participants` = n_distinct(df$user_id),
+  `Daily observations` = scales::comma(nrow(df)),
+  `Study period` = "Approximately 6 months",
+  `Data type` = "Synthetic longitudinal data"
+) %>%
+  kable(align = "c") %>%
+  kable_styling(full_width = TRUE, font_size = 36)
+```
+
+The dataset contains demographic, physiological, activity, lifestyle, sleep,
+and daily stress measures for simulated participants [@kaggle_dataset]. Public
+wearable datasets such as WESAD have supported the development and evaluation
+of physiological stress-detection methods [@schmidt2018wesad].
+
+## Data Preparation
+
+- Reviewed the dataset structure, variable types, and missingness.
+- Removed the small number of rows containing missing values.
+- Converted categorical variables to factors.
+- Summarized demographic, physiological, behavioral, sleep, and outcome
+  variables.
+- Examined the distribution of stress scores before modeling.
+
+## Distribution of Stress Scores
+
+```{r}
+#| label: stress-distribution
+#| fig-height: 5.4
+#| fig-width: 9
+
+ggplot(df_clean, aes(stress_score)) +
+  geom_histogram(bins = 20) +
+  labs(
+    title = "Figure 1. Distribution of Stress Scores",
+    subtitle = "Stress scores appear approximately normally distributed",
+    x = "Stress Score",
+    y = "Count"
+  ) +
+  theme_minimal()
+```
+
+The outcome distribution was reviewed before model fitting to identify its
+overall shape and any extreme values.
+
+## Correlation Heatmap
+
+```{r}
+#| label: correlation-heatmap
+#| fig-height: 6.3
+#| fig-width: 11
+
+continuous_vars_plot <- continuous_vars
+
+colnames(continuous_vars_plot) <- ifelse(
+  colnames(continuous_vars_plot) %in% names(variable_labels),
+  variable_labels[colnames(continuous_vars_plot)],
+  colnames(continuous_vars_plot)
+)
+
+corr_matrix <- cor(continuous_vars_plot, use = "complete.obs")
+
+corrplot(
+  corr_matrix,
+  method = "color",
+  type = "upper",
+  tl.cex = 0.7,
+  title = "Figure 2. Correlation Heatmap of Continuous Predictor Variables",
+  mar = c(0, 0, 2, 0)
+)
+```
+
+## Correlation Review
+
+- Continuous predictors were examined for strong pairwise correlations.
+- Steps and distance were highly correlated because both measured daily
+  physical activity.
+- BMI and weight were highly correlated because BMI is derived from weight and
+  height.
+- Distance and BMI were retained because they offered clearer interpretation
+  within the selected model.
+
+Removing redundant predictors reduced multicollinearity and made individual
+coefficients easier to interpret.
+
+# Modeling and Results {background-color="#176B87" background-transition="fade" .section-slide}
+
+## Model Development
+
+1. Removed the small number of rows containing missing values.
+2. Reviewed continuous predictors for strong correlations.
+3. Retained one variable from redundant pairs, including distance rather than
+   steps and BMI rather than weight.
+4. Fit a full random-intercept model.
+5. Removed variables with limited contribution to create a more interpretable
+   final model.
+
+## Final Model
+
+```{r}
+#| label: final-model-list
+
+tibble(
+  Domain = c("Activity", "Physiological", "Behavioral", "Sleep"),
+  Predictors = c(
+    "Workout type; distance traveled",
+    "Heart rate variability (HRV)",
+    "Caffeine; alcohol; screen time; mindfulness",
+    "Duration; efficiency; wake after sleep onset"
+  )
+) %>%
+  kable(align = c("l", "l")) %>%
+  kable_styling(full_width = TRUE, font_size = 36)
+```
+
+All predictors were modeled as fixed effects, with a random intercept for
+participant. The final model was estimated using restricted maximum likelihood.
+
+## Fixed Effects: Workout Type
+
+```{r}
+#| label: fixed-effects-workout
+
+coef_table <- broom.mixed::tidy(
+  lmm_final,
+  effects = "fixed",
+  conf.int = TRUE,
+  conf.level = 0.95
+) %>%
+  mutate(
+    Variable = case_when(
+      term == "(Intercept)" ~ "Intercept",
+      str_detect(term, "^workout_type") ~
+        paste0("Workout Type: ", str_remove(term, "^workout_type")),
+      term %in% names(variable_labels) ~ unname(variable_labels[term]),
+      TRUE ~ term
+    ),
+    Coefficient = round(estimate, 3),
+    `95% Confidence Interval` = paste0(
+      "(", round(conf.low, 4), ", ", round(conf.high, 4), ")"
+    ),
+    `p-value` = if_else(
+      p.value < .001,
+      "<0.001",
+      format(round(p.value, 4), nsmall = 4)
+    )
+  )
+
+coef_table %>%
+  filter(term == "(Intercept)" | str_detect(term, "^workout_type")) %>%
+  select(Variable, Coefficient, `95% Confidence Interval`, `p-value`) %>%
+  kable(
+    caption = "Fixed Effects from Final LMM: Intercept and Workout Type",
+    align = c("l", "c", "c", "c")
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "condensed"),
+    full_width = TRUE,
+    font_size = 28
+  )
+```
+
+The reference workout category is represented by the intercept. None of the
+workout-type indicators were statistically significant.
+
+## Fixed Effects: Daily Predictors
+
+```{r}
+#| label: fixed-effects-predictors
+
+coef_table %>%
+  filter(term != "(Intercept)", !str_detect(term, "^workout_type")) %>%
+  select(Variable, Coefficient, `95% Confidence Interval`, `p-value`) %>%
+  kable(
+    caption = "Fixed Effects from Final LMM: Physiological and Behavioral Predictors",
+    align = c("l", "c", "c", "c")
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "condensed"),
+    full_width = TRUE,
+    font_size = 28
+  )
+```
+
+## How to Read the Fixed-Effects Table
+
+- Each coefficient is the estimated change in stress score associated with a
+  one-unit increase in the predictor, holding the other variables constant.
+- An interval that does not cross zero indicates statistical significance at
+  the 0.05 level.
+- The p-value provides a corresponding test of whether the coefficient differs
+  from zero.
+
+The coefficients are unstandardized so they remain interpretable in their
+original measurement units. Because the predictors use different scales, their
+coefficient magnitudes should not be directly ranked as measures of importance.
+
+## What Was Associated With Lower Stress?
+
+Holding the other variables constant, lower stress scores were associated with:
+
+- Higher heart rate variability
+- Greater distance traveled
+- More mindfulness minutes
+- Longer sleep duration
+- Higher sleep efficiency
+
+
+## What Was Associated With Higher Stress?
+
+Holding the other variables constant, higher stress scores were associated with:
+
+- Greater caffeine intake
+- Greater alcohol consumption
+- More screen time
+- More wake time after sleep onset
+
+
+## Workout Type
+
+- None of the workout-type indicators were statistically significant after
+  adjustment for the other predictors.
+- Running showed a slightly lower estimated stress score than the reference
+  workout category, but its confidence interval included zero.
+- Workout type remained in the model because the type of physical activity is
+  substantively relevant to wearable-health research.
+
+
+## Model Performance
+
+```{r}
+#| label: model-performance
+
+r2_vals <- performance::r2(lmm_final)
+icc_val <- performance::icc(lmm_final)
+model_residuals <- resid(lmm_final)
+
+tibble(
+  Metric = c("Marginal R²", "Conditional R²", "ICC", "RMSE", "MAE"),
+  Value = c(
+    r2_vals$R2_marginal,
+    r2_vals$R2_conditional,
+    icc_val$ICC_adjusted,
+    sqrt(mean(model_residuals^2)),
+    mean(abs(model_residuals))
+  )
+) %>%
+  mutate(Value = round(Value, 3)) %>%
+  kable(align = "c") %>%
+  kable_styling(full_width = TRUE, font_size = 36)
+```
+
+## Interpreting Performance
+
+- Fixed effects explained approximately **72.6%** of variation in stress scores.
+- Conditional $R^2$ was only slightly higher, so the random intercept added
+  modest explanatory power.
+- The **ICC of 0.013** indicates little stable between-participant variation.
+- Predictions differed from observed scores by about **6.1 points (RMSE)** or
+  **4.8 points on average (MAE)**.
+
+The low ICC does not make the LMM unnecessary: the repeated observations still
+create a clustered data structure that should be accounted for.
+
+
+## Observed vs. Fitted Stress Scores
+
+```{r}
+#| label: observed-fitted
+#| fig-height: 5.8
+#| fig-width: 9
+
+ggplot(
+  data.frame(
+    Observed = df_clean$stress_score,
+    Fitted = fitted(lmm_final)
+  ),
+  aes(
+    x = Observed,
+    y = Fitted
+  )
+) +
+  geom_point(
+    alpha = 0.05,
+    size = 1
+  ) +
+  geom_abline(
+    slope = 1,
+    intercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    title = "Figure 7. Observed versus Fitted Stress Scores",
+    x = "Observed Stress Score",
+    y = "Fitted Stress Score"
+  ) +
+  theme_minimal()
+```
+
+Most observations fall near the reference line, although residual variation
+remains.
+
+## Assumption Checks
+
+Model diagnostics indicated:
+
+- Residuals were approximately normally distributed, with minor tail departures.
+- Residual variance was reasonably consistent across fitted values.
+- Residual plots showed no strong nonlinearity.
+- Participant-specific random effects were approximately normally distributed.
+
+Overall, the evaluated assumptions were reasonably satisfied, supporting
+interpretation of the fitted model [@yang2014adv].
+
+## Key Takeaways
+
+1. Physiological, behavioral, and sleep measures jointly explained a substantial
+   portion of variation in daily stress scores.
+2. HRV, distance, mindfulness, sleep duration, and sleep efficiency were
+   associated with lower stress.
+3. Caffeine, alcohol, screen time, and wake after sleep onset were associated
+   with higher stress.
+4. An LMM appropriately accounted for repeated daily measurements within
+   participants.
+
+## Limitations and Future Work
+
+- The data are synthetic; results are a demonstration of the modeling approach,
+  not clinical evidence.
+- Associations do not establish causation.
+- The model used a random intercept but did not model participant-specific slopes
+  or more complex time dependence.
+- Future work should validate the approach using real-world wearable data
+
+# Conclusion {background-color="#176B87" background-transition="fade" .section-slide}
 
 ## Conclusion
 
--   Summarize your key findings.
+Linear mixed models provide a practical framework for combining longitudinal
+wearable and lifestyle measures while respecting the repeated structure of the
+data.
 
--   Discuss the implications of your results.
 
-## References
+
+The final model offered strong explanatory performance within this synthetic
+dataset and identified interpretable relationships that could guide future
+research using real wearable-health data.
+
+## Questions?
+
+**Thank you**
+
+## References {.smaller}
+
+::: {#refs}
+:::
