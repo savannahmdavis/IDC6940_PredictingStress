@@ -320,8 +320,7 @@ ggplot(df_clean, aes(stress_score)) +
   theme_minimal()
 ```
 
-The outcome distribution was reviewed before model fitting to identify its
-overall shape and any extreme values.
+Stress scores were approximately normally distributed, with most observations concentrated near the center of the scale and no obvious extreme outliers.
 
 
 # Modeling and Results {background-color="#176B87" background-transition="fade" .section-slide}
@@ -369,17 +368,16 @@ corrplot(
   physical activity
 - BMI and weight were highly correlated because BMI is derived from weight and
   height
-- Distance and BMI were retained because they offered clearer interpretation
-  within the selected model
+- Distance and BMI were carried forward to the full model because they were easier to interpret than their correlated alternatives
 
 Removing redundant predictors reduced multicollinearity and made individual
 coefficients easier to interpret.
 
 ## Model Selection
 
-1. A full random-intercept model was fitted using all candidate predictors
+1. A full random-intercept model was fitted using the remaining candidate predictors
 
-2. Predictor contribution was evaluated based on statistical evidence, redundancy, model fit, and interpretability
+2. Predictor contribution was evaluated based on statistical evidence and practical interpretability
 
 3. Eleven variables with limited contribution were removed:
 
@@ -388,8 +386,6 @@ coefficients easier to interpret.
    - **Behavioral/sleep:** workout duration and sleep latency
 
 4. Workout type was retained because of its conceptual relevance to wearable activity, despite not being statistically significant
-
-The variables with limited contribution were removed to create a more interpretable final model.
 
 
 ## Final Model
@@ -435,7 +431,7 @@ $$
 &\quad
 -0.258(\text{HRV})
 -0.442(\text{Distance})
-+0.0340(\text{Caffeine})
++0.040(\text{Caffeine})
 +4.577(\text{Alcohol})\\
 &\quad
 +0.032(\text{Screen Time})
@@ -515,7 +511,7 @@ coef_table %>%
   filter(term != "(Intercept)", !str_detect(term, "^workout_type")) %>%
   select(Variable, Coefficient, `95% Confidence Interval`, `p-value`) %>%
   kable(
-    caption = "Fixed Effects from Final LMM: Physiological and Behavioral Predictors",
+    caption = "Fixed Effects from Final LMM: Daily Physiological, Behavioral, and Sleep Predictors",
     align = c("l", "c", "c", "c")
   ) %>%
   kable_styling(
@@ -580,8 +576,7 @@ tibble(
 - Predictions differed from observed scores by about 6.1 points (RMSE) or
   4.8 points on average (MAE)
 
-The low ICC does not make the LMM unnecessary: the repeated observations still
-create a longitudinal data structure that should be accounted for.
+Although the ICC was low, the LMM remained appropriate for the repeated-measures study design.
 
 
 ## Observed vs. Fitted Stress Scores
@@ -646,8 +641,7 @@ interpretation of the fitted model ^[@yang2014adv]
 
 ## Limitations and Future Work
 
-- The data was synthetic - results are a demonstration of the modeling approach,
-  not clinical evidence
+- The data was synthetic
 - Associations do not establish causation
 - The model did not include time dependence
 - Future work should validate the approach using real-world wearable data
@@ -656,9 +650,11 @@ interpretation of the fitted model ^[@yang2014adv]
 
 ## Conclusion
 
-Linear mixed models provide a practical framework for combining longitudinal
-wearable and lifestyle measures while respecting the repeated structure of the
-data.
+Within this synthetic dataset, physiological, behavioral, and sleep measures explained a substantial proportion of variation in daily stress scores.
+
+<br> 
+
+The results demonstrate how a linear mixed model can combine repeated wearable measurements while accounting for multiple observations from the same participant.
 
 <br>
 

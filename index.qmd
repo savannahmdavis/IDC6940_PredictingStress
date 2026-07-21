@@ -699,7 +699,7 @@ $$
 &\quad
 -0.258(\text{HRV})
 -0.442(\text{Distance})
-+0.0340(\text{Caffeine})
++0.040(\text{Caffeine})
 +4.577(\text{Alcohol})\\
 &\quad
 +0.032(\text{Screen Time})
