@@ -417,7 +417,44 @@ participant.
 
 The final model was estimated using restricted maximum likelihood.
 
-## Fixed Effects: Workout Type
+## Final Fitted Model
+
+The final fitted model can be written as:
+
+$$
+\begin{aligned}
+\widehat{\text{Stress Score}}_{ij}
+&= 116.118
+-0.135(\text{Workout}_{\text{Mixed}})
++0.084(\text{Workout}_{\text{None}})
+-0.195(\text{Workout}_{\text{Run}})\\
+&\quad
++0.093(\text{Workout}_{\text{Strength}})
+-0.169(\text{Workout}_{\text{Walk}})
++0.153(\text{Workout}_{\text{Yoga}})\\
+&\quad
+-0.258(\text{HRV})
+-0.442(\text{Distance})
++0.0340(\text{Caffeine})
++4.577(\text{Alcohol})\\
+&\quad
++0.032(\text{Screen Time})
+-0.042(\text{Mindfulness})
+-5.974(\text{Sleep Duration})\\
+&\quad
+-9.564(\text{Sleep Efficiency})
++0.005(\text{Wake After Sleep Onset})
++b_{0i}.
+\end{aligned}
+$$
+
+where:
+
+- $i$ indexes participants
+- $j$ indexes daily observations
+- $b_{0i}$ represents the participant-specific random intercept
+
+## Fixed Effects: Workout Type {.smaller}
 
 ```{r}
 #| label: fixed-effects-workout
@@ -463,9 +500,11 @@ coef_table %>%
 
 <br>
 
-The reference workout category is represented by the intercept. 
-
-None of the workout-type indicators were statistically significant.
+- None of the workout-type indicators were statistically significant
+- Running showed a slightly lower estimated stress score than the reference
+  workout category, but its confidence interval included zero
+- Workout type remained in the model because the type of physical activity is
+  substantively relevant to wearable-health research
 
 ## Fixed Effects: Daily Predictors
 
@@ -506,16 +545,6 @@ Holding the other variables constant, higher stress scores were associated with:
 - Greater alcohol consumption
 - More screen time
 - More wake time after sleep onset
-
-
-## Workout Type
-
-- None of the workout-type indicators were statistically significant after
-  adjustment for the other predictors
-- Running showed a slightly lower estimated stress score than the reference
-  workout category, but its confidence interval included zero
-- Workout type remained in the model because the type of physical activity is
-  substantively relevant to wearable-health research
 
 
 ## Model Performance
@@ -620,8 +649,7 @@ interpretation of the fitted model ^[@yang2014adv]
 - The data was synthetic - results are a demonstration of the modeling approach,
   not clinical evidence
 - Associations do not establish causation
-- The model used a random intercept but did not model participant-specific slopes
-  or more complex time dependence
+- The model did not include time dependence
 - Future work should validate the approach using real-world wearable data
 
 # Conclusion {background-color="#176B87" background-transition="fade" .section-slide}
@@ -632,6 +660,7 @@ Linear mixed models provide a practical framework for combining longitudinal
 wearable and lifestyle measures while respecting the repeated structure of the
 data.
 
+<br>
 
 The final model offered strong explanatory performance within this synthetic
 dataset and identified interpretable relationships that could guide future
