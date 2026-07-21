@@ -14,8 +14,6 @@ Which physiological and behavioral health metrics are significant predictors of 
 
 ## Project Status
 
-In Progress
+Completed
 
-Current Phase:
-- Polishing the paper
-- Drafting the slides
+Presentation Date: 7/28/2026
